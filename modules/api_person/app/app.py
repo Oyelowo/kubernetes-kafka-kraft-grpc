@@ -32,8 +32,9 @@ class PersonServicer(person_pb2_grpc.PersonServiceServicer):
                 "company_name" : request.company_name,
         }
         print(request_value)
-        person = person_pb2.Person(**request_value)
         new_person: Person = PersonService.create(request_value)
+
+        person = person_pb2.Person(**new_person.jsonify())
 
         return person
 
@@ -43,16 +44,18 @@ class PersonServicer(person_pb2_grpc.PersonServiceServicer):
                  "id" : request.id,
         }
         print(request_value)
-        person = person_pb2.Person(**request_value)
         new_person: Person = PersonService.retrieve(request.id)
-
-        return new_person
+        person = person_pb2.Person(**new_person.jsonify())
+        print("Get it person,", person)
+        return person
 
     def GetAllPersons(self, request, context):
 
         person = person_pb2.Person()
-        persons: List[Person] = PersonService.retrieve_all()
-
+        persons_db: List[Person] = PersonService.retrieve_all()
+        persons = person_pb2.Persons()
+        persons.persons.extend([person_pb2.Person(**p.jsonify()) for p in persons_db])
+        
         return persons
 
 
