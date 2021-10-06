@@ -28,11 +28,13 @@ class LocationResource(Resource):
     @responds(schema=LocationSchema)
     def post(self) -> Location:
         request.get_json()
+        # TODO: Send location data to Kafka Location topic
         location: Location = LocationService.create(request.get_json())
         return location
 
     @responds(schema=LocationSchema)
     def get(self, location_id) -> Location:
+        # TODO: Get location data from location service via GRPC
         location: Location = LocationService.retrieve(location_id)
         return location
 
@@ -43,11 +45,13 @@ class PersonsResource(Resource):
     @responds(schema=PersonSchema)
     def post(self) -> Person:
         payload = request.get_json()
+        # TODO: Send Person payload to person service via GRPC
         new_person: Person = PersonService.create(payload)
         return new_person
 
     @responds(schema=PersonSchema, many=True)
     def get(self) -> List[Person]:
+        # TODO: Get all persons from person service via GRPC
         persons: List[Person] = PersonService.retrieve_all()
         return persons
 
@@ -57,6 +61,7 @@ class PersonsResource(Resource):
 class PersonResource(Resource):
     @responds(schema=PersonSchema)
     def get(self, person_id) -> Person:
+        # TODO: Get person from person service via GRPC
         person: Person = PersonService.retrieve(person_id)
         return person
 
@@ -74,6 +79,7 @@ class ConnectionDataResource(Resource):
         end_date: datetime = datetime.strptime(request.args["end_date"], DATE_FORMAT)
         distance: Optional[int] = request.args.get("distance", 5)
 
+        # TODO: Get connection data from location service via GRPC
         results = ConnectionService.find_contacts(
             person_id=person_id,
             start_date=start_date,

@@ -1,0 +1,27 @@
+syntax = "proto3";
+package api.person;
+
+message Person {
+ int32 id = 1;
+ string first_name = 2;
+ string last_name = 3;
+ string company_name = 4;
+}
+
+message GetPersonRequest {
+ int32 id = 1;
+}
+
+message Empty {
+
+}
+
+message Persons {
+ repeated Person persons = 1;
+}
+
+service PersonService {
+   rpc CreatePerson(Person) returns (Person);
+   rpc GetPerson(GetPersonRequest) returns (Person);
+   rpc GetAllPersons(Empty) returns (Persons);
+}

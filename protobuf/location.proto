@@ -1,0 +1,25 @@
+syntax = "proto3";
+    
+message Location {
+    int32 id = 1;
+    string person_id = 2;
+    string longitude = 3;
+    string latitude = 4;
+    string creation_time = 5;
+}
+
+message Connection {
+    api.person.Person person = 1;
+    Location location = 1;
+}
+
+message ConnectionRequest {
+    int32 person_id = 1;
+    string start_date = 2; 
+    string end_date = 3;: 
+    float meters = 4;
+}
+
+service Connection {
+    rpc GetConnection (ConnectionRequest) returns (Connection);
+}
