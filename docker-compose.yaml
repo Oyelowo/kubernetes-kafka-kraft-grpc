@@ -1,0 +1,61 @@
+version: "3"
+
+services:
+  # api:
+  #   build: api
+  #   command: ["flask", "run", "--host=0.0.0.0"]
+  #   volumes:
+  #     - ./api:/backend
+  #   environment:
+  #     - FLASK_ENV=development
+  #     - FLASK_APP=app.py
+  #   ports:
+  #     - "5000:5000"
+  api_person:
+    build: modules/api_person/
+    command: ["python3", "./app/app.py"]
+    environment:
+      - DB_USERNAME=ct_admin
+      - DB_NAME=geoconnections
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_PASSWORD=wowimsosecure%
+      #- FLASK_ENV=development
+      #- FLASK_APP=app.py
+    ports:
+      - "50051:50051"
+
+  postgres:
+    image: postgis/postgis:12-2.5-alpine
+    container_name: postgres-container
+    ports:
+      - "5432:5432"
+      # - 5432:5432/tcp
+    environment:
+      - POSTGRES_USER=ct_admin
+      - POSTGRES_PASSWORD=wowimsosecure%
+      - POSTGRES_DB=geoconnections
+      # DB_USERNAME: "ct_admin"
+      # DB_NAME: "geoconnections"
+      # DB_HOST: "postgres"
+      # DB_PORT: "5432"
+      # DB_PASSWORD: wowimsosecure%
+    volumes:
+      - /var/lib/postgres
+      - ./dbscripts/postgres:/docker-entrypoint-initdb.d
+
+  # client:
+  #   tty: true
+  #   build: client
+  #   command: ["npm", "start"]
+  #   volumes:
+  #     - ./client:/frontend
+  #     - node-modules:/frontend/node_modules
+  #   environment:
+  #     - NODE_ENV=development
+  #   ports:
+  #     - '3000:3000'
+  #   depends_on:
+  #     - api
+# volumes:
+#   node-modules:

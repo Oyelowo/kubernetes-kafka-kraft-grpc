@@ -18,4 +18,5 @@ EXPOSE 50051
 
 COPY . .
 # CMD ["flask", "run", "--host", "0.0.0.0"]
+# CMD ["python3", "./app"]
 CMD ["python3", "./app/app.py"]

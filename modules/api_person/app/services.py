@@ -1,8 +1,8 @@
 import logging
 from typing import Dict, List
 
-from app import db
-from app.models import Person
+from config import db
+from models import Person
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger("udaconnect-api")
