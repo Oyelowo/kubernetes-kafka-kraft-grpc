@@ -14,7 +14,7 @@ UUID = postgresql.UUID(as_uuid=True)
 class Person(db.Model):
     __tablename__ = "person"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     # uid = Column(UUID, primary_key=True, default=uuid.uuid4, nullable=False)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)

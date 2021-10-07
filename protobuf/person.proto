@@ -8,6 +8,12 @@ message Person {
  string company_name = 4;
 }
 
+message CreatePersonRequest {
+ string first_name = 2;
+ string last_name = 3;
+ string company_name = 4;
+}
+
 message GetPersonRequest {
  int32 id = 1;
 }
@@ -21,7 +27,7 @@ message Persons {
 }
 
 service PersonService {
-   rpc CreatePerson(Person) returns (Person);
+   rpc CreatePerson(CreatePersonRequest) returns (Person);
    rpc GetPerson(GetPersonRequest) returns (Person);
    rpc GetAllPersons(Empty) returns (Persons);
 }
