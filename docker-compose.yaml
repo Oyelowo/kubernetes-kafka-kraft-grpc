@@ -40,9 +40,9 @@ services:
       # DB_HOST: "postgres"
       # DB_PORT: "5432"
       # DB_PASSWORD: wowimsosecure%
-    # volumes:
-    #   - /var/lib/postgres
-    #   - dbscripts:/docker-entrypoint-initdb.d
+    volumes:
+      - /var/lib/postgres
+      - dbscripts:/docker-entrypoint-initdb.d
 
   # client:
   #   tty: true
@@ -59,6 +59,6 @@ services:
   #     - api
 # volumes:
 #   node-modules:
-# volumes:
-#   dbscripts:
-#     external: false
+volumes:
+  dbscripts:
+    # external: false
