@@ -62,5 +62,7 @@ config_by_name = {cfg.CONFIG_NAME: cfg for cfg in EXPORT_CONFIGS}
 
 
 app = Flask(__name__)
-app.config.from_object(config_by_name[os.getenv("FLASK_ENV") or "test"])
 db = SQLAlchemy(app)
+
+def create_app(env=None):
+    app.config.from_object(config_by_name[env or "test"])
