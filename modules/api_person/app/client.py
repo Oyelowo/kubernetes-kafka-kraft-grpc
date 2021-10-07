@@ -18,7 +18,7 @@ stub = person_pb2_grpc.PersonServiceStub(channel)
 # print("resppp", response)
 
 
-response3 = stub.GetPerson(person_pb2.GetPersonRequest(id=4))
+response3 = stub.GetPerson(person_pb2.GetPersonRequest(id=1))
 
 print("resppp3\n", response3)
 

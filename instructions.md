@@ -10,7 +10,7 @@ This will generate protobuf code from the .proto file into `./modules/api_person
 # Local development with docker compose
 `docker-compose  up --build`
 
-`chmod +x ./scripts/run_db_docker.sh`
+`chmod +x scripts/run_db_docker.sh`
 
 
 `scripts/run_db_docker.sh postgres-container`
