@@ -8,10 +8,9 @@ stub = person_pb2_grpc.PersonServiceStub(channel)
 
 
 # person = person_pb2.Person(
-#     #id = 7,
-#     first_name = "Oyelowo2",
-#     last_name = "Oyedayo2",
-#     company_name = "Blayz2",
+#     first_name = "Kivi",
+#     last_name = "sto",
+#     company_name = "Wrong",
 # )
 
 
@@ -19,9 +18,9 @@ stub = person_pb2_grpc.PersonServiceStub(channel)
 # print("resppp", response)
 
 
-response3 = stub.GetPerson(person_pb2.GetPersonRequest(id=1))
+response3 = stub.GetPerson(person_pb2.GetPersonRequest(id=4))
 
-print("resppp3", response3)
+print("resppp3\n", response3)
 
 response2 = stub.GetAllPersons(person_pb2.Empty())
 print("resppp2", response2)
