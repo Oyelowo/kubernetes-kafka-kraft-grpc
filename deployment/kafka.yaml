@@ -1,15 +1,7 @@
-$ cat namespace.yml
----
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: kafka
-
-$ kubectl apply -f namespace.yml
-namespace/kafka created
-
-
-$ cat pv.yml
+  name: kafka-kraft
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -24,36 +16,92 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/mnt/data"
+    path: '/mnt/data'
 ---
 apiVersion: v1
-kind: PersistentVolume
+kind: PersistentVolumeClaim
 metadata:
-  name: kafka-pv-volume-2
-  labels:
-    type: local
+  name: kafka-pv-claim
+  namespace: kafka-kraft
 spec:
   storageClassName: manual
-  capacity:
-    storage: 10Gi
   accessModes:
     - ReadWriteOnce
-  hostPath:
-    path: "/mnt/data"
+  resources:
+    requests:
+      storage: 3Gi
 ---
 apiVersion: v1
-kind: PersistentVolume
+kind: Service
 metadata:
-  name: kafka-pv-volume-3
+  name: kafka-svc
   labels:
-    type: local
+    app: kafka-app
+  namespace: kafka-kraft
 spec:
-  storageClassName: manual
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/data"
-
-$ kubectl apply -f pv.yml
+  clusterIP: None
+  ports:
+    - name: '9092'
+      port: 9092
+      protocol: TCP
+      targetPort: 9092
+  selector:
+    app: kafka-app
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+  labels:
+    app: kafka-app
+  namespace: kafka-kraft
+spec:
+  serviceName: kafka-svc
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kafka-app
+  template:
+    metadata:
+      labels:
+        app: kafka-app
+    spec:
+      volumes:
+        - name: kafka-storage
+          persistentVolumeClaim:
+            claimName: kafka-pv-claim
+      containers:
+        - name: kafka-container
+          # image: docker_username/kafka-kraft
+          image: oyelowo/kafka-kraft-mode-3.0.0:latest
+          # readinessProbe:
+          #   httpGet:
+          #     port: 7070
+          #     path: /readiness
+          #   initialDelaySeconds: 120
+          #   periodSeconds: 15
+          #   failureThreshold: 1
+          #   timeoutSeconds: 10
+          # livenessProbe:
+          #   httpGet:
+          #     port: 7070
+          #     path: /liveness
+          #   initialDelaySeconds: 360
+          #   periodSeconds: 15
+          #   failureThreshold: 3
+          #   timeoutSeconds: 10
+          ports:
+            - containerPort: 9092
+            - containerPort: 9093
+          env:
+            - name: REPLICAS
+              value: '3'
+            - name: SERVICE
+              value: kafka-svc
+            - name: NAMESPACE
+              value: kafka-kraft
+            - name: SHARE_DIR
+              value: /mnt/kafka
+          volumeMounts:
+            - name: kafka-storage
+              mountPath: /mnt/kafka
