@@ -11,6 +11,20 @@ services:
   #     - FLASK_APP=app.py
   #   ports:
   #     - "5000:5000"
+  kafka-kruft:
+    build: modules/kafka-kraft/
+    environment:
+      - REPLICAS='3'
+      - SERVICE=kafka-svc
+      - NAMESPACE=kafka-kraft
+      - SHARE_DIR=/mnt/kafka
+      #- FLASK_ENV=development
+      #- FLASK_APP=app.py
+    ports:
+      - "9093:9092"
+    volumes:
+      - /mnt/kafka
+
   api_person:
     build: modules/api_person/
     command: ["python3", "./app/app.py"]

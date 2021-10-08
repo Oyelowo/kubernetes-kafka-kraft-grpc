@@ -1,0 +1,59 @@
+$ cat namespace.yml
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kafka
+
+$ kubectl apply -f namespace.yml
+namespace/kafka created
+
+
+$ cat pv.yml
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kafka-pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kafka-pv-volume-2
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kafka-pv-volume-3
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"
+
+$ kubectl apply -f pv.yml

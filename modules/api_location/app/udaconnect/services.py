@@ -3,13 +3,28 @@ from datetime import datetime, timedelta
 from typing import Dict, List
 
 from app import db
-from app.udaconnect.models import Connection, Location, Person
-from app.udaconnect.schemas import ConnectionSchema, LocationSchema, PersonSchema
+from app.udaconnect.models import Connection, Location
+from app.udaconnect.schemas import LocationSchema
 from geoalchemy2.functions import ST_AsText, ST_Point
 from sqlalchemy.sql import text
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger("udaconnect-api")
+
+import json
+from flask import Flask, jsonify, request, g, Response
+
+
+def create_order(order_data):
+    """
+    This is a stubbed method of retrieving a resource. It doesn't actually do anything.
+    """
+    # Turn order_data into a binary string for Kafka
+    kafka_data = json.dumps(order_data).encode()
+    # Kafka producer has already been set up in Flask context
+    kafka_producer = g.kafka_producer
+    kafka_producer.send("items", kafka_data)
+
 
 
 class ConnectionService:
@@ -110,26 +125,27 @@ class LocationService:
         db.session.commit()
 
         return new_location
+# """ 
 
+# class PersonService:
+#     @staticmethod
+#     def create(person: Dict) -> Person:
+#         new_person = Person()
+#         new_person.first_name = person["first_name"]
+#         new_person.last_name = person["last_name"]
+#         new_person.company_name = person["company_name"]
 
-class PersonService:
-    @staticmethod
-    def create(person: Dict) -> Person:
-        new_person = Person()
-        new_person.first_name = person["first_name"]
-        new_person.last_name = person["last_name"]
-        new_person.company_name = person["company_name"]
+#         db.session.add(new_person)
+#         db.session.commit()
 
-        db.session.add(new_person)
-        db.session.commit()
+#         return new_person
 
-        return new_person
+#     @staticmethod
+#     def retrieve(person_id: int) -> Person:
+#         person = db.session.query(Person).get(person_id)
+#         return person
 
-    @staticmethod
-    def retrieve(person_id: int) -> Person:
-        person = db.session.query(Person).get(person_id)
-        return person
+#     @staticmethod
+#     def retrieve_all() -> List[Person]:
+#         return db.session.query(Person).all()
 
-    @staticmethod
-    def retrieve_all() -> List[Person]:
-        return db.session.query(Person).all()

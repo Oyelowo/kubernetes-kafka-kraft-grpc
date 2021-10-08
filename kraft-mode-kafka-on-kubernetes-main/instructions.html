@@ -1,0 +1,1585 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+	<link rel="preload" href="https://developer.ibm.com/site-content/themes/ibmdeveloper-carbon/style.css?cb=240" as="style" onload="this.onload=null;this.rel='stylesheet'">
+	<noscript><link rel="stylesheet" href="https://developer.ibm.com/site-content/themes/ibmdeveloper-carbon/style.css?cb=240"></noscript>
+	<script>
+		/*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			// unbind listeners
+			if( link.addEventListener ){
+				link.removeEventListener( "load", enableStylesheet );
+			} else if( link.attachEvent ){
+				link.detachEvent( "onload", enableStylesheet );
+			}
+			link.setAttribute( "onload", null );
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+	</script>
+	<title>Apache Kafka fundamentals &#8211; IBM Developer</title>
+<link rel='dns-prefetch' href='//1.www.s81c.com' />
+<link rel='dns-prefetch' href='//resources.digital-cloud-ibm.medallia.eu' />
+<link rel='dns-prefetch' href='//s.w.org' />
+<link rel="alternate" type="application/rss+xml" title="IBM Developer &raquo; Feed" href="https://developer.ibm.com/feed/" />
+<link rel="alternate" type="application/rss+xml" title="IBM Developer &raquo; Comments Feed" href="https://developer.ibm.com/comments/feed/" />
+    <link rel="canonical" href="https://developer.ibm.com/articles/event-streams-kafka-fundamentals/" />
+        <!-- <meta name="madeupmeta" content="/articles/event-streams-kafka-fundamentals/--https://developer.ibm.com" /> -->
+    <meta name="description" content="Apache Kafka is designed and optimized to be a high-throughput, low-latency, fault-tolerant, scalable platform for handling real-time data feeds. In this article, you learn some of the common use cases for Apache Kafka and then learn the core concepts for Apache Kafka. You'll also learn how producers and consumers work and how Kafka Streams and Kafka Connect can be used to create powerful data streaming pipelines." />
+    <meta name="keywords" content="what is Apache Kafka, Kafka, event streaming, IBM Event Streams, data streaming">
+
+    <!-- if condition here for og  og_meta -->
+          <meta property="og:title" content="Apache Kafka fundamentals" />
+      <meta property="og:description" content="Apache Kafka is designed and optimized to be a high-throughput, low-latency, fault-tolerant, scalable platform for handling real-time data feeds. In this article, you learn some of the common use cases for Apache Kafka and then learn the core concepts for Apache Kafka. You\'ll also learn how producers and consumers work and how Kafka Streams and Kafka Connect can be used to create powerful data streaming pipelines." />
+      <meta property="og:type" content="Article" />
+      <meta property="og:site_name" content="IBM Developer" />
+      <meta property="og:url" content="https://developer.ibm.com/articles/event-streams-kafka-fundamentals/" />
+      <meta property="og:image" content="https://s3.us.cloud-object-storage.appdomain.cloud/ibmdevwp/icons/social/articles.jpg"/>
+        <!-- if condition here for twitter twitter_meta -->
+    <meta property="twitter:account_id" content="16362921" />
+
+    <meta name="twitter:card" content="summary">      <meta name="twitter:url" content="https://developer.ibm.com/articles/event-streams-kafka-fundamentals/">
+      <meta name="twitter:title" content="Apache Kafka fundamentals">
+      <meta name="twitter:description" content="Apache Kafka is designed and optimized to be a high-throughput, low-latency, fault-tolerant, scalable platform for handling real-time data feeds. In this article, you learn some of the common use cases for Apache Kafka and then learn the core concepts for Apache Kafka. You\'ll also learn how producers and consumers work and how Kafka Streams and Kafka Connect can be used to create powerful data streaming pipelines.">
+      <meta name="twitter:image" content="https://s3.us.cloud-object-storage.appdomain.cloud/ibmdevwp/icons/social/articles.jpg">
+      <meta property="twitter:image:src" content="https://s3.us.cloud-object-storage.appdomain.cloud/ibmdevwp/icons/social/articles.jpg" />
+      <meta name="twitter:site" content="https://developer.ibm.com">
+      <meta name="twitter:creator" content="@ibmdeveloper">
+    
+    <meta name="ahrefs-site-verification" content="94fa8aa62b043c70442b349844ee10902416702fc2728b6a378a00d49ecc61d7">
+
+    <!-- BEGIN: Use this section to set page specific variables for the Page Tag -->
+  	<script language="JavaScript">var NTPT_PGEXTRA="ibmCmaId=264113&ibmContentAreas=Apache Kafka,";</script>
+  	<!--END -->
+    <script>
+  		digitalData = {
+  				"page": {
+  					"category": {
+  						"primaryCategory": "SOFDCACLZZ"
+  					},
+  					"pageInfo": {
+  						"effectiveDate": "2020-12-09T00:00:00",
+  						"language": "en",
+  						"publishDate": "2020-12-09 00:00:00",
+  						"expiryDate": "",
+  						"publisher": "IBM Corporation",
+  						"version": "v18",
+  						"ibm": {
+  							"contentDelivery": "IBM Developer template",
+  							"contentProducer": "IBM Developer",
+  							"country": "ZZ",
+                "contentArea": "Apache Kafka,",
+  							"owner": "developerWorks Content/Raleigh/IBM",
+  							"siteID": "DWNEXT",
+  							"subject": "ZZ000",
+  							"type": "CT316",
+  							"contentId": "264113",
+  						},
+  						"keywords": "what is Apache Kafka, Kafka, event streaming, IBM Event Streams, data streaming",
+  						"description": "Apache Kafka is designed and optimized to be a high-throughput, low-latency, fault-tolerant, scalable platform for handling real-time data feeds. In this article, you learn some of the common use cases for Apache Kafka and then learn the core concepts for Apache Kafka. You\'ll also learn how producers and consumers work and how Kafka Streams and Kafka Connect can be used to create powerful data streaming pipelines."
+  					}
+  				}
+  			};
+
+        window._analytics = {
+          "coremetrics": false,
+          "optimizely": false,
+          "googleAddServices": false,
+          "addRoll": false,
+          "intercom": false,
+          "fullStory": false,
+          "hotjar": false,
+          "tealeaf": false,
+          "nps": true,
+          "segment_key": 'HU3dbkAG5wE0F1IkRf9S1RexlAqo3jby'
+        };
+  	</script>
+  	<!-- Segment meta tag -->
+  	<meta name="segment" property="developerWorks (developerWorks)" productTitle="developerWorks" value="Home English (developerWorks)"/>
+    <link rel="icon" href="//www.ibm.com/favicon.ico"/>
+
+    		<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/13.0.1\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/13.0.1\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/developer.ibm.com\/wp-includes\/js\/wp-emoji-release.min.js?ver=5.6.5"}};
+			!function(e,a,t){var n,r,o,i=a.createElement("canvas"),p=i.getContext&&i.getContext("2d");function s(e,t){var a=String.fromCharCode;p.clearRect(0,0,i.width,i.height),p.fillText(a.apply(this,e),0,0);e=i.toDataURL();return p.clearRect(0,0,i.width,i.height),p.fillText(a.apply(this,t),0,0),e===i.toDataURL()}function c(e){var t=a.createElement("script");t.src=e,t.defer=t.type="text/javascript",a.getElementsByTagName("head")[0].appendChild(t)}for(o=Array("flag","emoji"),t.supports={everything:!0,everythingExceptFlag:!0},r=0;r<o.length;r++)t.supports[o[r]]=function(e){if(!p||!p.fillText)return!1;switch(p.textBaseline="top",p.font="600 32px Arial",e){case"flag":return s([127987,65039,8205,9895,65039],[127987,65039,8203,9895,65039])?!1:!s([55356,56826,55356,56819],[55356,56826,8203,55356,56819])&&!s([55356,57332,56128,56423,56128,56418,56128,56421,56128,56430,56128,56423,56128,56447],[55356,57332,8203,56128,56423,8203,56128,56418,8203,56128,56421,8203,56128,56430,8203,56128,56423,8203,56128,56447]);case"emoji":return!s([55357,56424,8205,55356,57212],[55357,56424,8203,55356,57212])}return!1}(o[r]),t.supports.everything=t.supports.everything&&t.supports[o[r]],"flag"!==o[r]&&(t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&t.supports[o[r]]);t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&!t.supports.flag,t.DOMReady=!1,t.readyCallback=function(){t.DOMReady=!0},t.supports.everything||(n=function(){t.readyCallback()},a.addEventListener?(a.addEventListener("DOMContentLoaded",n,!1),e.addEventListener("load",n,!1)):(e.attachEvent("onload",n),a.attachEvent("onreadystatechange",function(){"complete"===a.readyState&&t.readyCallback()})),(n=t.source||{}).concatemoji?c(n.concatemoji):n.wpemoji&&n.twemoji&&(c(n.twemoji),c(n.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script>
+		<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+	<link rel='stylesheet' id='ibmcode-articles-css'  href='https://developer.ibm.com/site-content/plugins/ibmcode-articles/public/css/ibmcode_articles.css?ver=1.0.0' type='text/css' media='all' />
+<script type='text/javascript' src='https://developer.ibm.com/wp-includes/js/jquery/jquery.min.js?ver=3.5.1' id='jquery-core-js'></script>
+<script type='text/javascript' src='https://developer.ibm.com/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.3.2' id='jquery-migrate-js'></script>
+<script type='text/javascript' id='authLink-script-js-extra'>
+/* <![CDATA[ */
+var authLinkAction = {"ajax_url":"https:\/\/developer.ibm.com\/wp-admin\/admin-ajax.php","nonce":"a4c4aeb161"};
+/* ]]> */
+</script>
+<script type='text/javascript' src='https://developer.ibm.com/site-content/plugins/w3-ibm-id-auth/includes/../js/authPageAccess.js?ver=5.6.5' id='authLink-script-js'></script>
+<script defer type='text/javascript' src='https://developer.ibm.com/site-content/themes/ibmdeveloper-carbon/js/ibmcode.js?ver=20151217' id='code-utils-defer-js'></script>
+<script async type='text/javascript' src='https://developer.ibm.com/site-content/themes/ibmdeveloper-carbon/js/carbon-components.min.js?cb=123&#038;ver=5.6.5' id='carbon-components-async-js'></script>
+<script async type='text/javascript' src='//1.www.s81c.com/common/stats/ida_stats.js' id='coremetrics-async-js'></script>
+<script async type='text/javascript' src='//resources.digital-cloud-ibm.medallia.eu/wdceuibm/2398/onsite/embed.js' id='medallia-async-js'></script>
+<link rel="https://api.w.org/" href="https://developer.ibm.com/developerapi/" /><link rel="alternate" type="application/json" href="https://developer.ibm.com/developerapi/wp/v2/ibmcode_articles/264113" /><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://developer.ibm.com/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://developer.ibm.com/wp-includes/wlwmanifest.xml" /> 
+<meta name="generator" content="WordPress 5.6.5" />
+<link rel='shortlink' href='https://developer.ibm.com/?p=264113' />
+<link rel="alternate" type="application/json+oembed" href="https://developer.ibm.com/developerapi/oembed/1.0/embed?url=https%3A%2F%2Fdeveloper.ibm.com%2Farticles%2Fevent-streams-kafka-fundamentals%2F" />
+<link rel="alternate" type="text/xml+oembed" href="https://developer.ibm.com/developerapi/oembed/1.0/embed?url=https%3A%2F%2Fdeveloper.ibm.com%2Farticles%2Fevent-streams-kafka-fundamentals%2F&#038;format=xml" />
+</head>
+<body id="ibm-com" data-envt="developer.ibm.com" data-loggedin="" data-nls="" data-envt="production" class="ibmcode_articles-template-default single single-ibmcode_articles postid-264113 no-fixed-menu no-sidebar">
+	<div class="code_p_announcement blue" id="code_announcement">
+              <div class="code_content__wrap"><a class="announce_link" href="https://developer.ibm.com/callforcode/awards/">
+                            <p>2021 Call for Code Awards: Live from New York, with SNL’s Colin Jost! <span class="bx--btn bx--btn--primary" style="vertical-align:middle">Learn more<svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="will-change: transform;"><path d="M14 4l-1.1 1.1 6 6.1H2v1.6h16.9l-6 6.1L14 20l8-8z"></path></svg></span></p>
+                          </a><a href="#" class="announcement_close" id="announcement_close"><svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><path d="M16 2C8.2 2 2 8.2 2 16s6.2 14 14 14 14-6.2 14-14S23.8 2 16 2zm0 26C9.4 28 4 22.6 4 16S9.4 4 16 4s12 5.4 12 12-5.4 12-12 12z"></path><path d="M21.4 23L16 17.6 10.6 23 9 21.4l5.4-5.4L9 10.6 10.6 9l5.4 5.4L21.4 9l1.6 1.6-5.4 5.4 5.4 5.4z"></path><title>Close outline</title></svg></a>
+              </div>
+            </div>	<div class="bx--header--website-wrap">
+  <div class="code_content__wrap">
+
+    <header aria-label="IBM Platform Name" class="bx--header" role="banner">
+      <a class="bx--skip-to-content" href="#main-content" tabindex="0">Skip to main content</a>
+      <button aria-label="Open menu" id="developer-burger" class="bx--header__action--menu bx--header__action bx--header__menu-trigger bx--header__menu-toggle" title="Open menu" type="button">
+        <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" style="will-change: transform;">
+          <path d="M2 14.8h16V16H2zm0-3.6h16v1.2H2zm0-3.6h16v1.2H2zM2 4h16v1.2H2z"></path>
+        </svg>
+      </button>
+      <a class="bx--header__name-old" href="https://developer.ibm.com/"><span class="bx--header__name--prefix">IBM</span>&nbsp;Developer</a>
+      <div class="bx--header__name">
+        <a class="bx--header__ibm" href="//www.ibm.com">
+          <svg class="Footer-module--logo--3otJM" width="47" height="30" viewBox="0 -10 85 52" xmlns="http://www.w3.org/2000/svg"><g fill-rule="evenodd"><path d="M0 32h15.689v-2.038H0zM0 27.721h15.689v-2.038H0zM4.483 23.442h6.724v-2.037H4.483zM4.483 19.164h6.724v-2.038H4.483zM4.483 14.885h6.724v-2.037H4.483zM4.482 10.606h6.724V8.568H4.482zM0 6.327h15.689V4.29H0zM0 2.049h15.689V.011H0zM17.93 29.963V32h16.504a8.521 8.521 0 0 0 5.54-2.037H17.93zM17.93 25.683v2.038h23.914a8.535 8.535 0 0 0 .85-2.038H17.93zM22.412 23.442h6.724v-2.037h-6.724zM40.124 17.126H22.412v2.038H41.77a8.62 8.62 0 0 0-1.645-2.038M22.413 12.848v2.036h17.786a8.612 8.612 0 0 0 1.644-2.037h-19.43zM42.693 6.327a8.447 8.447 0 0 0-.85-2.037H17.93v2.037h24.763zM39.974 2.049a8.521 8.521 0 0 0-5.54-2.037H17.93v2.037h22.044zM22.412 10.606h6.724V8.568h-6.724zM35.453 10.606h7.29a8.603 8.603 0 0 0 .248-2.038h-7.538v2.038zM35.453 21.405v2.037h7.538c0-.703-.09-1.384-.248-2.037h-7.29zM57.457 0H44.825v2.038h13.34zM44.826 32h11.21v-2.038h-11.21zM44.826 27.72h11.21v-2.038h-11.21zM49.309 23.439h6.727v-2.038h-6.727zM49.309 19.159h6.727v-2.038h-6.727zM69.488 32h11.21v-2.038h-11.21zM69.488 27.72h11.21v-2.038h-11.21zM69.488 23.439h6.726v-2.038h-6.726zM69.487 19.159h6.726v-2.038h-6.726zM69.488 14.879h6.726V12.84H63.606l-.707 2.038h5.903l.686-1.94zM61.916 12.84H49.31v2.039h6.726v-1.94l.686 1.94h5.903zM76.213 8.56H65.091l-.707 2.038h11.83zM68.06 0l-.706 2.038h13.344V0zM62.757 32l.72-2.038h-1.432zM61.254 27.72h3.015l.72-2.038h-4.455zM59.743 23.44h6.037l.72-2.039h-7.476zM58.232 19.159h9.06l.719-2.038h-10.5zM49.309 10.598h11.83l-.707-2.038H49.309zM65.868 6.318h14.83V4.28H66.576zM58.947 4.28H44.826v2.038h14.828z"></path></g></svg>
+        </a>
+        <a href="https://developer.ibm.com/" class="bx--header__ibmdeveloper">
+          IBM <b>Developer</b>        </a>
+      </div>
+
+      <nav aria-label="IBM [Platform]" class="bx--header__nav">
+        <ul class="bx--header__menu-bar" role="menubar"><li id='topics' class=' menu-item menu-item-type-custom menu-item-object-custom menu-item menu-item-type-custom menu-item-object-custom menu-item-has-mega'><a  aria-haspopup="menu" aria-expanded="false" role="menuitem" class="bx--header__menu-item bx--header__menu-title" href="#">Topics<svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" aria-hidden="true" class="bx--header__menu-arrow"><path d="M5 6L0 1 .7.3 5 4.6 9.3.3l.7.7z"></path></svg></a><div class="mega-menu bx--header__menu sub-menu" role="menu"><div class="mega-menu-inner"><div class="code_content__wrap"><ul>
+ 	<li><h4>Technologies</h4></li>
+ 	<li><a href="/technologies/analytics/">Analytics</a></li>
+ 	<li><a href="/technologies/artificial-intelligence/">Artificial Intelligence</a></li>
+ 	<li><a href="/technologies/containers/">Containers</a></li>
+ 	<li><a href="/technologies/">See all</a></li>
+</ul>
+<ul>
+ 	<li><h4>Languages</h4></li>
+ 	<li><a href="/languages/cobol/">COBOL</a></li>
+ 	<li><a href="/languages/java/">Java</a></li>
+ 	<li><a href="/languages/node-js/">Node.js</a></li>
+ 	<li><a href="/languages/python/">Python</a></li>
+ 	<li><a href="/languages/">See all</a></li>
+</ul>
+<ul>
+ 	<li><h4>Development practices</h4></li>
+ 	<li><a href="/devpractices/devops/">DevOps</a></li>
+	<li><a href="/devpractices/open-source-development/">Open-source development</a></li>
+ 	<li><a href="/devpractices/">See all</a></li>
+<br />
+<br />
+ 	<li><h4>Architectures & Deployment Models</h4></li>
+ 	<li><a href="/depmodels/cloud/">Cloud</a></li>
+ 	<li><a href="/depmodels/edge-computing/">Edge Computing</a></li>
+ 	<li><a href="/depmodels/microservices/">Microservices</a></li>
+ 	<li><a href="/depmodels/">See all</a></li>
+</ul>
+<ul>
+ 	<li><h4>Solutions</h4></li>
+ 	<li><a href="/solutions/application-modernization/">App Modernization</a></li>
+ 	<li><a href="/solutions/security/">Security</a></li>
+ 	<li><a href="/solutions/">See all</a></li>
+<br />
+<br />
+        <li><h4>Industries</h4></li>
+ 	<li><a href="/industries/finance/">Finance</a></li>
+ 	<li><a href="/industries/gaming/">Gaming</a></li>
+ 	<li><a href="/industries/retail/">Retail</a></li>
+ 	<li><a href="/industries/">See all</a></li>
+</ul>
+</div></div></div></li>
+<li id='products_&_services' class=' menu-item menu-item-type-custom menu-item-object-custom menu-item menu-item-type-custom menu-item-object-custom menu-item-has-mega'><a  aria-haspopup="menu" aria-expanded="false" role="menuitem" class="bx--header__menu-item bx--header__menu-title" href="#">Products & Services<svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" aria-hidden="true" class="bx--header__menu-arrow"><path d="M5 6L0 1 .7.3 5 4.6 9.3.3l.7.7z"></path></svg></a><div class="mega-menu bx--header__menu sub-menu" role="menu"><div class="mega-menu-inner"><div class="code_content__wrap"><ul>
+  <li><h4>Open Source</h4></li>
+  <li><a href="/components/kubernetes/">Kubernetes</a></li>
+  <li><a href="/components/node-red/">Node-RED</a></li>
+  <li><a href="/components/istio/">Istio</a></li>
+  <li><a href="/components/tensorflow/">TensorFlow</a></li>
+  <li><a href="/components/open-liberty/">Open Liberty</a></li>
+  <li><a href="/components/">See all</a></li>
+</ul>
+<ul>
+  <li><h4>IBM Products & Services</h4></li>
+  <li><a href="/components/cloud-pak-for-data/">IBM Cloud Pak for Data</a></li>
+  <li><a href="/components/cloud-pak-for-integration/">IBM Cloud Pak for Integration</a></li>
+  <li><a href="/components/ibmz/">IBM Z</a></li>
+  <li><a href="/components/redhat-openshift-ibm-cloud/">Red Hat OpenShift on IBM Cloud</a></li>
+  <li><a href="/components/websphere-hybrid-edition/">WebSphere Hybrid Edition</a></li>
+  <li><a href="/components/">See all</a></li>
+</ul>
+<ul>
+  <li><h4>APIs</h4></li>
+  <li><a href="/apis/">IBM API Hub</a></li>
+  <li><hr style="margin-top: 1rem; margin-bottom: 1rem"></li>
+  <li><a href="/apis/catalog/orderoptimizer--ibm-watson-order-optimizer/Introduction/">IBM Sterling Fulfillment Optimizer with Watson</a></li>
+  <li><a href="/apis/catalog/dataquality4ai--data-quality-for-ai/api/API--dataquality4ai--data-quality/">Data Quality for AI</a></li>
+  <li><a href="/apis/catalog/aspera--aspera-automation-api/api/API--aspera--aspera-automation-api#Createanaction/">Aspera Automation API</a></li>
+  <li><a href="/apis/catalog/">See all</a></li>
+</ul></div></div></div></li>
+<li id='community' class=' menu-item menu-item-type-custom menu-item-object-custom menu-item menu-item-type-custom menu-item-object-custom menu-item-has-mega'><a  aria-haspopup="menu" aria-expanded="false" role="menuitem" class="bx--header__menu-item bx--header__menu-title" href="#">Community<svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" aria-hidden="true" class="bx--header__menu-arrow"><path d="M5 6L0 1 .7.3 5 4.6 9.3.3l.7.7z"></path></svg></a><div class="mega-menu bx--header__menu sub-menu" role="menu"><div class="mega-menu-inner"><div class="code_content__wrap"><ul>
+  <li><a href="/community/">Home</a></li>
+  <li><a href="/blogs/">Blog posts</a></li>
+  <li><a href="/events/">Events</a></li>
+  <li><a href="/conferences/">Digital conferences</a></li>
+  <li><a href="/videos/">Videos</a></li>
+ <!-- <li><a href="/livestream/">Livestreaming</a></li> -->
+  <li><a href="/podcasts/">Podcasts</a></li>
+  <!-- <li><a href="/cities/">Cities</a></li> -->
+  <li><a href="/newsletters/">Newsletters</a></li>
+</ul>
+<div>
+<ul>
+  <li><h4>Get Involved</h4></li>
+  <li><a href="/callforcode/?cm_sp=Developer-_-cfc-2020-_-nav-ov75914">Call for Code Global Challenge</a></li>
+</ul>
+<br />
+<ul>
+  <li><h4>Workshops</h4></li>
+  <li><a href="/openshift-world-tour/">Build Smart on Kubernetes World Tour</a></li>
+</ul>
+</div></div></div></div></li>
+<li id='open_source_at_ibm' class=' menu-item menu-item-type-custom menu-item-object-custom menu-item menu-item-type-custom menu-item-object-custom menu-item-has-mega'><a  aria-haspopup="menu" aria-expanded="false" role="menuitem" class="bx--header__menu-item bx--header__menu-title" href="#">Open source at IBM<svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" aria-hidden="true" class="bx--header__menu-arrow"><path d="M5 6L0 1 .7.3 5 4.6 9.3.3l.7.7z"></path></svg></a><div class="mega-menu bx--header__menu sub-menu" role="menu"><div class="mega-menu-inner"><div class="code_content__wrap"><ul>
+  <li><a href="https://www.ibm.com/opensource/">Home</a></li>
+  <li><a href="https://www.ibm.com/opensource/community-involvement/">Communities</a></li>
+  <li><a href="https://www.ibm.com/opensource/enterprise/">Culture</a></li>
+  <li><a href="https://www.ibm.com/opensource/open-projects/">Open projects</a></li>
+  <li><a href="https://www.ibm.com/opensource/story/">Our story</a></li>
+  <li><a href="/exchanges/models/">Model Asset eXchange</a></li>
+  <li><a href="/exchanges/data/">Data Asset eXchange</a></li>
+</ul></div></div></div></li>
+</ul>      </nav>
+      <div class="bx--header__global">
+        <div id="header-search-module" class="GlobalSearch-module--container GlobalSearch-module--hidden" role="search">
+          <label for="search-input" id="search-label" class="GlobalSearch-module--label">Search</label>
+          <form action="https://developer.ibm.com/" method="GET" class="GlobalSearch-module--inputWrapper" role="combobox" aria-owns="search-menu" aria-haspopup="menu" aria-expanded="false">
+            <button tabindex="0" class="GlobalSearch-module--searchButton GlobalSearch-module--search-button--search" type="button" aria-label="Open search">
+              <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change:transform" description="Open search" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M30 28.59L22.45 21A11 11 0 1 0 21 22.45L28.59 30zM5 14a9 9 0 1 1 9 9 9 9 0 0 1-9-9z"></path>
+              </svg>
+            </button>
+                            <input type="text" autocomplete="off" tabindex="-1" aria-autocomplete="list" aria-controls="search-menu" aria-activedescendant="menu-item-0" class="GlobalSearch-module--input GlobalSearch-module--hidden" id="search-input-header" placeholder="Search IBM Developer" value="" name="q">
+            
+            <button tabindex="-1" class="GlobalSearch-module--searchButton GlobalSearch-module--search-button--close GlobalSearch-module--hidden" type="button" aria-label="Clear search">
+              <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change:transform" description="Clear search" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4l6.6 6.6L8 22.6 9.4 24l6.6-6.6 6.6 6.6 1.4-1.4-6.6-6.6L24 9.4z"></path>
+              </svg>
+            </button>
+          </form>
+          <ul aria-labelledby="search-label" role="menu" id="search-menu" class="GlobalSearch-module--list GlobalSearch-module--hidden"></ul>
+        </div>
+        <div id="header-login-module" aria-expanded="false" class="GlobalLogin-module--container GlobalLogin-module--hidden" role="login">
+                      <button aria-label="Open menu" class="bx--header__action--login bx--header__action" title="Open menu" type="button">
+              <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;">
+                <path d="M16 2a14 14 0 1 0 14 14A14 14 0 0 0 16 2zm-6 24.38v-2A3.22 3.22 0 0 1 13 21h6a3.22 3.22 0 0 1 3 3.39v2a11.92 11.92 0 0 1-12 0zm14-1.46v-.61A5.21 5.21 0 0 0 19 19h-6a5.2 5.2 0 0 0-5 5.31v.59a12 12 0 1 1 16 0z"></path><path d="M16 7a5 5 0 1 0 5 5 5 5 0 0 0-5-5zm0 8a3 3 0 1 1 3-3 3 3 0 0 1-3 3z"></path>
+              </svg>
+            </button>
+            <ul id="ibm-signin-minimenu-container" role="menu" aria-label="Profile" class="bx--header__submenu">
+              <li class="menu-item"><a class="bx--header__menu-item" role="menuitem" href="/profile">My Dashboard</a></li>
+							<li class="menu-item"><a class="bx--header__menu-item" role="menuitem" href="https://myibm.ibm.com/?lnk=mmi" tabindex="0">My IBM</a></li>
+							<li class="menu-item"><a id="bx--header-signinout" class="bx--header__menu-item" role="menuitem" rel="nofollow" href="https://developer.ibm.com/sso/login?d=https%3A%2F%2Fdeveloper.ibm.com%2Farticles%2Fevent-streams-kafka-fundamentals%2F&lang=us_EN" tabindex="-1">Sign In</a></li>
+						</ul>
+                  </div>
+      </div>
+    </header>
+  </div>
+</div>
+<div class="side-nav-click-to-close side-nav-click-to-close__closed" id="code--side-nav-cover"></div>
+<!-- Navigation wrapper for accessibility -->
+<nav class="bx--side-nav__navigation bx--side-nav bx--side-nav--expanded bx--side-nav--website bx--side-nav--website--dark bx--side-nav--ux" aria-label="Side navigation" id="code--side-nav-old">
+<!--nav class="bx--side-nav__navigation bx--side-nav bx--side-nav--ux bx--side-nav--website--dark" role="navigation" aria-label="Navigation" id="code--side-nav"-->
+  <!-- <header class="bx--side-nav__header"></header> -->
+  <!-- Renders all of our navigation items -->
+  <ul class="bx--side-nav__items" id="developerNavTriggersMobile"><li data-level="0" class='bx--side-nav__item '><a href="/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Home</span></a></li>
+<hr class="bx--side-nav__divider">
+<li data-level="0" class='megasection bx--side-nav__item'><button aria-haspopup="true" aria-expanded="true" class="noclick bx--side-nav__submenu" type="button">
+              <span class="bx--side-nav__submenu-title">Topics</span>
+            </button>
+<ul class="bx--side-nav__menu" role="menu">
+<li data-level="1" class='bx--side-nav__menu-item'><button aria-haspopup="true" aria-expanded="false" class="bx--side-nav__submenu" type="button">
+              <span class="bx--side-nav__submenu-title">Technologies</span>
+              <div class="bx--side-nav__icon bx--side-nav__icon--small bx--side-nav__submenu-chevron">
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><path d="M16 22L6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"></path></svg>
+              </div>
+            </button>
+	<ul class="bx--side-nav__menu" role="menu">
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/technologies/analytics/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Analytics</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/technologies/artificial-intelligence/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Artificial Intelligence</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/technologies/containers/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Containers</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/technologies/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">See all</span></a></li>
+	</ul>
+</li>
+<li data-level="1" class='bx--side-nav__menu-item'><button aria-haspopup="true" aria-expanded="false" class="bx--side-nav__submenu" type="button">
+              <span class="bx--side-nav__submenu-title">Languages</span>
+              <div class="bx--side-nav__icon bx--side-nav__icon--small bx--side-nav__submenu-chevron">
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><path d="M16 22L6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"></path></svg>
+              </div>
+            </button>
+	<ul class="bx--side-nav__menu" role="menu">
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/languages/cobol/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">COBOL</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/languages/java/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Java</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/languages/php/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">PHP</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/languages/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">See all</span></a></li>
+	</ul>
+</li>
+<li data-level="1" class='bx--side-nav__menu-item'><button aria-haspopup="true" aria-expanded="false" class="bx--side-nav__submenu" type="button">
+              <span class="bx--side-nav__submenu-title">Development Practices</span>
+              <div class="bx--side-nav__icon bx--side-nav__icon--small bx--side-nav__submenu-chevron">
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><path d="M16 22L6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"></path></svg>
+              </div>
+            </button>
+	<ul class="bx--side-nav__menu" role="menu">
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/devpractices/devops/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">DevOps</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/devpractices/open-source-development/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Open-source development</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/devpractices/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">See all</span></a></li>
+	</ul>
+</li>
+<li data-level="1" class='bx--side-nav__menu-item'><button aria-haspopup="true" aria-expanded="false" class="bx--side-nav__submenu" type="button">
+              <span class="bx--side-nav__submenu-title">Architectures & Deployment models</span>
+              <div class="bx--side-nav__icon bx--side-nav__icon--small bx--side-nav__submenu-chevron">
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><path d="M16 22L6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"></path></svg>
+              </div>
+            </button>
+	<ul class="bx--side-nav__menu" role="menu">
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/depmodels/cloud/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Cloud</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/depmodels/edge-computing/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Edge computing</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/depmodels/microservices/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Microservices</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/depmodels/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">See all</span></a></li>
+	</ul>
+</li>
+<li data-level="1" class='bx--side-nav__menu-item'><button aria-haspopup="true" aria-expanded="false" class="bx--side-nav__submenu" type="button">
+              <span class="bx--side-nav__submenu-title">Solutions</span>
+              <div class="bx--side-nav__icon bx--side-nav__icon--small bx--side-nav__submenu-chevron">
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><path d="M16 22L6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"></path></svg>
+              </div>
+            </button>
+	<ul class="bx--side-nav__menu" role="menu">
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/solutions/application-modernization/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">App Modernization</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/solutions/security/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Security</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/solutions/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">See all</span></a></li>
+	</ul>
+</li>
+<li data-level="1" class='bx--side-nav__menu-item'><button aria-haspopup="true" aria-expanded="false" class="bx--side-nav__submenu" type="button">
+              <span class="bx--side-nav__submenu-title">Industries</span>
+              <div class="bx--side-nav__icon bx--side-nav__icon--small bx--side-nav__submenu-chevron">
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><path d="M16 22L6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"></path></svg>
+              </div>
+            </button>
+	<ul class="bx--side-nav__menu" role="menu">
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/industries/finance/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Finance</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/industries/gaming/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Gaming</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/industries/retail/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Retail</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/industries/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">See all</span></a></li>
+	</ul>
+</li>
+</ul>
+</li>
+<hr class="bx--side-nav__divider">
+<li data-level="0" class='megasection bx--side-nav__item'><button aria-haspopup="true" aria-expanded="true" class="noclick bx--side-nav__submenu" type="button">
+              <span class="bx--side-nav__submenu-title">Products & Services</span>
+            </button>
+<ul class="bx--side-nav__menu" role="menu">
+<li data-level="1" class='bx--side-nav__menu-item'><button aria-haspopup="true" aria-expanded="false" class="bx--side-nav__submenu" type="button">
+              <span class="bx--side-nav__submenu-title">Open Source</span>
+              <div class="bx--side-nav__icon bx--side-nav__icon--small bx--side-nav__submenu-chevron">
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><path d="M16 22L6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"></path></svg>
+              </div>
+            </button>
+	<ul class="bx--side-nav__menu" role="menu">
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/components/kubernetes/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Kubernetes</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/components/node-red/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Node-RED</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/components/istio/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Istio</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/components/tensorflow/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">TensorFlow</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/components/open-liberty/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Open Liberty</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/components/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">See all</span></a></li>
+	</ul>
+</li>
+<li data-level="1" class='bx--side-nav__menu-item'><button aria-haspopup="true" aria-expanded="false" class="bx--side-nav__submenu" type="button">
+              <span class="bx--side-nav__submenu-title">IBM Product & Services</span>
+              <div class="bx--side-nav__icon bx--side-nav__icon--small bx--side-nav__submenu-chevron">
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><path d="M16 22L6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"></path></svg>
+              </div>
+            </button>
+	<ul class="bx--side-nav__menu" role="menu">
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/components/cloud-pak-for-data/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">IBM Cloud Pak for Data</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/components/redhat-openshift-ibm-cloud/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Red Hat OpenShift on IBM Cloud</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/components/sterling/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">IBM Sterling</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/components/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">See all</span></a></li>
+	</ul>
+</li>
+</ul>
+</li>
+<hr class="bx--side-nav__divider">
+<li data-level="0" class='megasection bx--side-nav__item'><button aria-haspopup="true" aria-expanded="true" class="noclick bx--side-nav__submenu" type="button">
+              <span class="bx--side-nav__submenu-title">Community</span>
+            </button>
+<ul class="bx--side-nav__menu" role="menu">
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/community/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Home</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/blogs/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Blog posts</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/events/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Events</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/conferences/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Digital conferences</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/videos/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Videos</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/podcasts/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Podcasts</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/newsletters/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Newsletters</span></a></li>
+<li data-level="1" class='bx--side-nav__menu-item'><button aria-haspopup="true" aria-expanded="false" class="bx--side-nav__submenu" type="button">
+              <span class="bx--side-nav__submenu-title">Get Involved</span>
+              <div class="bx--side-nav__icon bx--side-nav__icon--small bx--side-nav__submenu-chevron">
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><path d="M16 22L6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"></path></svg>
+              </div>
+            </button>
+	<ul class="bx--side-nav__menu" role="menu">
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/callforcode/?cm_sp=Developer-_-cfc-2021-_-nav-ov75914" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Call for Code Global Challenge</span></a></li>
+	</ul>
+</li>
+<li data-level="1" class='bx--side-nav__menu-item'><button aria-haspopup="true" aria-expanded="false" class="bx--side-nav__submenu" type="button">
+              <span class="bx--side-nav__submenu-title">Workshops</span>
+              <div class="bx--side-nav__icon bx--side-nav__icon--small bx--side-nav__submenu-chevron">
+                <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><path d="M16 22L6 12l1.4-1.4 8.6 8.6 8.6-8.6L26 12z"></path></svg>
+              </div>
+            </button>
+	<ul class="bx--side-nav__menu" role="menu">
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/openshift-world-tour/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Build Smart on Kubernetes World Tour</span></a></li>
+	</ul>
+</li>
+</ul>
+</li>
+<hr class="bx--side-nav__divider">
+<li data-level="0" class='megasection bx--side-nav__item'><button aria-haspopup="true" aria-expanded="true" class="noclick bx--side-nav__submenu" type="button">
+              <span class="bx--side-nav__submenu-title">Opensource at IBM</span>
+            </button>
+<ul class="bx--side-nav__menu" role="menu">
+<li data-level="2" class='bx--side-nav__menu-item'><a href="https://www.ibm.com/opensource/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Home</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="https://www.ibm.com/opensource/community-involvement/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Communities</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="https://www.ibm.com/opensource/enterprise/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Culture</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="https://www.ibm.com/opensource/open-projects/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Open projects</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="https://www.ibm.com/opensource/story/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Our story</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/exchanges/models/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Model asset exchange</span></a></li>
+<li data-level="2" class='bx--side-nav__menu-item'><a href="/exchanges/data/" class="bx--side-nav__link" role="menuitem"><span class="bx--side-nav__link-text">Data asset exchange</span></a></li>
+</ul>
+</li>
+<hr class="bx--side-nav__divider">
+</ul>  <!-- Renders the button to collapse or expand the side nav -->
+  <!-- <footer class="bx--side-nav__footer"></footer> -->
+</nav>
+
+	<!-- totally new layout -->
+<div class="ibm-developer" style="display:none;">
+  <div class="bx--grid">
+    <div class="bx--row">
+      <div class="bx--col-lg-12">max-content width</div>
+      <div class="bx--col-lg-12">developer.ibm.com</div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- begin new layout -->
+<div id="content" class="container ">
+  <div id="code_aside__navwrap" class="code_aside__navwrap"><div id="code_leftnav" class="code_leftnav">
+              <div class="mobile_wrap">
+                <div class="inner">
+                  <div class="code_leftnav_header"><h3><a href="/components/kafka/">Apache Kafka</a></h3></div><nav role="navigation" aria-label="Content portlet"><ul id="menu-content-nav" class=""><li><a href="https://kafka.apache.org/quickstart">Get Apache Kafka</a></li><li><a href="/components/kafka/articles/">Articles</a></li><li><a href="/components/kafka/learningpaths/">Learning Paths</a></li><li><a href="/components/kafka/patterns/">Code Patterns</a></li><li><a href="/components/kafka/series/">Series</a></li><li><a href="/components/kafka/tutorials/">Tutorials</a></li><li><a href="/components/kafka/videos/">Videos</a></li></ul></nav><nav role="navigation" aria-label="Community portlet"><h4>Community</h4><ul id="menu-community-nav" class=""><li><a href="/components/kafka/blogs/">Blog Posts</a></li><li><a href="/components/kafka/events/">Events</a></li></ul></nav><nav> <h4>Related topics</h4> <ul> <li><a href="/technologies/messaging/">Messaging</a></li> <li><a href="/components/cloud-pak-for-integration/">IBM Cloud Pak for Integration</a></li> </ul> </nav> <nav> <h4>More resources</h4> <ul><li><a href="http://strimzi.io/" target="_blank" rel="noopener noreferrer nofollow">Strimzi: Kafka on Kubernetes</a></li> </ul> </nav> </nav>
+                  <div class="code_aside_mobilenav_close">
+                    <button id="code_aside__navtoggle_close">
+                      <i>Close</i>
+                      <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><path d="M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4l6.6 6.6L8 22.6 9.4 24l6.6-6.6 6.6 6.6 1.4-1.4-6.6-6.6L24 9.4z"></path><title>Close</title></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div></div>  <div class="page_content">
+    <div class="page_content_wrap">
+
+<!-- begin new layout -->
+<div class="code_postcontent ibmcode_articles">
+  <div class="cpt-hero">
+    <div class="cpt-hero__wrap">
+      <div class="bx--grid bx--no-gutter">
+        <div class="bx--row">
+          <div class="bx--col-md-7 bx--col-lg-7 herotext">
+            <p class="cpt-byline__posttype"><span>Article</span></p>
+            <h1 class="cpt-byline__title">Apache Kafka fundamentals</h1>            <h2 class="cpt-byline__subtitle">Learn the key concepts of the open-source stream-processing software that IBM Event Streams is built on</h2>            <div class="dev-like-and-save"><a id="flfContent" class="mylastaction" href="https://developer.ibm.com/sso/login?d=https%3A%2F%2Fdeveloper.ibm.com%2Farticles%2Fevent-streams-kafka-fundamentals%2F&lang=us_EN"><svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><path d="M16,6.52l2.76,5.58.46,1,1,.15,6.16.89L22,18.44l-.75.73.18,1,1.05,6.13-5.51-2.89L16,23l-.93.49L9.56,26.34l1-6.13.18-1L10,18.44,5.58,14.09l6.16-.89,1-.15.46-1L16,6.52M16,2l-4.55,9.22L1.28,12.69l7.36,7.18L6.9,30,16,25.22,25.1,30,23.36,19.87l7.36-7.17L20.55,11.22Z"></path><title>Favorite this</title></svg> Save</a><a id="flfContent2" class="mylastaction" href="https://developer.ibm.com/sso/login?d=https%3A%2F%2Fdeveloper.ibm.com%2Farticles%2Fevent-streams-kafka-fundamentals%2F&lang=us_EN"><svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" fill="currentColor" width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><path d="M26,11H20V6a3.64,3.64,0,0,0-3.24-4A3.22,3.22,0,0,0,16,2H14.43A1.51,1.51,0,0,0,13,3.17v.12L12,9.63,8.46,15H2V29H21c7.44,0,9-4.35,9-8V15a3.64,3.64,0,0,0-3.24-4A3.22,3.22,0,0,0,26,11ZM8,27H4V17H8Zm20-6c0,4.09-2.22,6-7,6H10V16.3l4-5.93L14.73,5l.14-1H16c1.44,0,2,.56,2,2v7h8c1.44,0,2,.56,2,2Z"></path><title>Thumbs up</title></svg> Like</a></div>          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cpt-body">
+    
+    <div class="bx--grid bx--no-gutter">
+      <div class="bx--row">
+        <div class="bx--col-md-7 bx--col-lg-7">
+          <div class="cpt-byline">
+            <div class="cpt-byline__wrap">
+              <p class="cpt-byline__author">By <a href="https://developer.ibm.com/profiles/mickael.maison">Mickael Maison</a>, <a href="https://developer.ibm.com/profiles/dineeno"> Oliver Dineen</a>, <a href="https://developer.ibm.com/profiles/gantigmaa.selenge1"> Gantigmaa Selenge</a>,  Joseph Kent <br> Published December 9, 2020</p>
+              <hr>
+            </div>
+          </div>
+          <section class="wp-content">
+            <!-- begin main body content -->
+            <!-- <sidebar> <heading>Learning path: IBM Event Streams Developer Essentials Badge</heading> <p>This article is part of the IBM Event Streams Developer Essentials learning path and badge.</p> <ul><li>[IBM Event Streams fundamentals](/articles/event-streams-fundamentals)</li><li>[Apache Kafka fundamentals](/articles/event-streams-kafka-fundamentals)</li><li>[Deploying and using a basic Kafka instance](/tutorials/deploying-and-using-a-basic-kafka-instance)</li><li>[Get hands on experience](/tutorials/event-streams-hands-on-java-sample)</li><li>[Take on the coding challenge](/tutorials/event-streams-badge-event-streams-dev-challenge)</li><li>[Debug your app](/articles/event-streams-dev-cheat-sheet)</li></ul></sidebar> -->
+
+<p xmlns="http://www.w3.org/1999/xhtml"><a href="https://kafka.apache.org/">Apache Kafka</a> is designed and optimized to be a high-throughput, low-latency, fault-tolerant, scalable platform for handling real-time data feeds. Kafka does this all amazingly well and has established itself as a core building block for many of today&#8217;s event streaming applications.  </p>
+<p>In this article, you will learn some of the common use cases and core concepts for Apache Kafka. You&#8217;ll also learn how producers and consumers work and how Kafka Streams and Kafka Connect can be used to create powerful data streaming pipelines.</p>
+<p>The following diagram describes the core components that connect to Kafka and the data flow between them:</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/kafka-fundamentals.png" alt="Apache Kafka Concept diagram"/></p>
+<h2 id="common-use-cases">Common use cases</h2>
+<p>Apache Kafka project is a powerful and scalable technology that is widely adopted for a variety of use cases, including these use cases:</p>
+<ul>
+<li><strong>Messaging</strong> &#8211; Kafka offers high throughput, built-in partitioning, replication, and fault-tolerance, which makes it a good choice when handling large-scale messaging.</li>
+<li><strong>Operational monitoring</strong> &#8211; Kafka can provide centralized feeds of metric and logging data from multiple data sources. It offers lower-latency processing and easier support for multiple data sources and distributed data consumption.</li>
+<li><strong>Stream processing</strong> &#8211; Many users process data in processing pipelines that consist of multiple stages, where raw input data is consumed from Kafka topics and then aggregated, enriched, or otherwise transformed into new topics for further consumption or follow-up processing. With such processing pipelines, you can build cost-effective, resilient, and scalable real-time data processing solutions.</li>
+<li><strong>Microservices</strong> &#8211; Kafka can help simplify complex communication between microservices by decoupling senders from receivers with asynchronous messaging.</li>
+</ul>
+<p>There are many more use cases for Kafka, such as website activity tracking and event sourcing, and the list of use cases is still expanding as Kafka adoption is rapidly growing.</p>
+<h2 id="key-concepts-of-apache-kafka">Key concepts of Apache Kafka</h2>
+<p>Now that we know the common use cases for Kafka, let&#8217;s explore some of the key concepts to understand how it works.</p>
+<ul>
+<li><a href="#Brokers">Brokers</a></li>
+<li><a href="#Messages">Messages</a></li>
+<li><a href="#Topics-and-Partitions">Topics and Partitions</a></li>
+<li><a href="#Replication">Replication</a></li>
+</ul>
+<h3 id="brokers">Brokers</h3>
+<p>Kafka is run as a cluster on a set of servers, which are called brokers. A cluster has a minimum of 3 brokers as shown in the following example:</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/broker.png" alt="Kafka brokers"/></p>
+<h3 id="messages">Messages</h3>
+<p>A message is a unit of data in Kafka. Each message is comprised of two parts: key and value. The key is commonly used for data about the message and the value is the body of the message. Kafka uses the terms message and record interchangeably.</p>
+<h3 id="topics-and-partitions">Topics and partitions</h3>
+<p>Each topic is a named stream of messages. A topic is made up of one or more partitions. The messages on a partition are ordered by a number called the offset.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/offset.png" alt="Topic offset"/></p>
+<p>By having multiple partitions distributed across the brokers, the scalability of a topic is increased. If a topic has more than one partition, it allows data to be fed through in parallel to increase throughput by distributing the partitions across the cluster.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/topic-partition.png" alt="Kafka Topic and Partition"/></p>
+<p>Messages on topics are not kept forever. Kafka will remove old messages. You can specify whether you want to remove messages after a certain amount of time or when the log reaches a certain size.</p>
+<p>Topics and partitions can be managed using <a href="https://cloud.ibm.com/docs/EventStreams?topic=EventStreams-kafka_console_tools">Kafka console tools</a> or <a href="/tutorials/managing-ibm-event-streams-topics-using-the-kafka-admin-api/">Kafka Admin API</a>.</p>
+<h3 id="replication">Replication</h3>
+<p>To improve availability and resiliency, each topic can be replicated onto multiple brokers. For each partition, one of the brokers is the leader, and the other brokers are the followers.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/replication.png" alt="Replication"/></p>
+<p>All produce and consume requests for the partition are handled by the leader replica. The followers replicate the partition data from the leader with the aim of keeping up with the leader. A follower replica that is keeping up with the partition leader is &#8220;in-sync&#8221;. All the replicas should usually be in-sync but it&#8217;s acceptable for a replica to be temporarily not in-sync while it&#8217;s catching up after a failure.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/partition-leader.png" alt="Partition Leader"/></p>
+<p>If the leader for a partition fails, one of the followers with an in-sync replica automatically takes over as the partition&#8217;s leader. Any follower with an in-sync replica can become the leader without losing any messages. In practice, every server is the leader for some partitions and the follower for others. The process of designating a new leader replica is called a leadership election. The leadership of partitions is dynamic and changes as servers come and go.</p>
+<p>In the following example, broker 1 is the leader for partition 1 of topic A.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/partition-leader-down.png" alt="Partition Leader Offline"/></p>
+<p>When broker 1 goes offline, broker 2 becomes the leader for the partition automatically.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/leader-election.png" alt="Partition Leader Election"/></p>
+<p>Applications do not need to take specific actions to handle the change in the leadership of a partition. The Kafka client library automatically reconnects to the new leader, although you will see increased latency while the cluster settles.</p>
+<h2 id="apache-kafka-clients">Apache Kafka clients</h2>
+<p>Let&#8217;s now learn about the Kafka clients that allow applications to send, receive, and process data from and to Kafka.</p>
+<ul>
+<li><a href="#Producers">Producers</a></li>
+<li><a href="#Consumers">Consumers</a></li>
+<li><a href="#Kafka-Streams">Kafka Streams</a></li>
+<li><a href="#Kafka-Connect">Kafka Connect</a></li>
+</ul>
+<h3 id="producers">Producers</h3>
+<p>A producer is an application that publishes streams of messages to Kafka topics. A producer can publish to one or more topics and can optionally choose the partition that stores the data.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/producer-concept.png" alt="Producer"/></p>
+<p>When a producer connects to Kafka, it makes an initial bootstrap connection. This connection can be to any of the brokers in the cluster. The producer requests information about the topic that it wants to publish to so that it knows which broker and partition it needs to connect to.</p>
+<p>Then, the producer establishes another connection to the partition leader and can begin to publish messages. These actions happen automatically internally when your producer connects to the Kafka cluster.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/producer.png" alt="Producer"/></p>
+<p>When a message is sent to the partition leader, that message is not immediately available to consumers. The leader appends the message to the partition, assigning it the next offset number for that partition. After all the followers have replicated the message and acknowledged that they&#8217;ve written the message to their replicas, the message is now committed and becomes available for consumers.</p>
+<p>As mentioned earlier, a message is comprised of two parts: key and value.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/message-key.png" alt="Message Key Value"/></p>
+<p>The producer can explicitly specify a partition number when it publishes a message. This gives direct control, but it makes the producer code more complex because it takes on the responsibility for managing the partition selection. If the producer does not specify a partition number, the selection of a partition is made by a partitioner. The default partitioner that is built into the Kafka producer works as follows:</p>
+<ul>
+<li><p>If the message does not have a key, it selects the partition in a round-robin fashion.</p>
+<p>  <img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/producer-no-key.png" alt="Produce with no key"/></p>
+</li>
+<li><p>If the message does have a key, it selects the partition by calculating a hash value for the key. This has the effect of selecting the same partition for all messages with the same key.</p>
+<p>  <img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/producer-key.png" alt="Produce with key"/></p>
+</li>
+</ul>
+<p>You can also write your own custom partitioner. A custom partitioner can choose any scheme to assign messages to partitions. For example, use just a subset of the information in the key or an application-specific identifier.</p>
+<p>Because many tools in the Kafka ecosystem (such as connectors to other systems) use only the value and ignore the key, it&#8217;s best to put all of the message data in the value and just use the key for partitioning or log compaction.</p>
+<p>Many other messaging systems also have a way of carrying other information along with the messages. Kafka uses message headers for this purpose, more information can be found <a href="https://kafka.apache.org/documentation/#recordheader">here</a>.</p>
+<h4 id="message-ordering">Message ordering</h4>
+<p>Kafka generally writes messages in the order that they are sent by the producer. However, there are situations where retries can cause messages to be duplicated or reordered. If you want a sequence of messages to be sent in order, it&#8217;s very important to ensure that they are all written to the same partition by giving the same key because this is the only way to guarantee message ordering.</p>
+<p>The producer is also able to retry sending messages automatically. It&#8217;s often a good idea to enable this retry feature because the alternative is that your application code has to perform any retries itself. The combination of batching in Kafka and automatic retries can have the effect of duplicating messages and reordering them.</p>
+<h4 id="message-acknowledgments">Message acknowledgments</h4>
+<p>When you publish a message, you can choose the level of acknowledgments required using the <code style="font-family:monospace;font-size:1rem">acks</code> producer configuration. The choice represents a balance between throughput and reliability.
+A producer sending messages has three levels of acknowledgements as follows:</p>
+<div style="overflow-x:auto"><table class="bx--data-table-v2 bx--data-table-v2--compact"><thead xmlns:dw="http://www.ibm.com/developerWorks/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<tr>
+<th><span class="bx--table-header-label">Acknowledgment Mode</span></th>
+<th><span class="bx--table-header-label">Reliability</span></th>
+<th><span class="bx--table-header-label">Meaning</span></th>
+</tr>
+</thead><tbody xmlns:dw="http://www.ibm.com/developerWorks/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<tr>
+<td>acks=0</td>
+<td>Least reliable</td>
+<td>It does not wait for a reply from the brokers. Message is considered sent as soon as it has been written to the network.                                                                                           </td>
+</tr>
+<tr>
+<td>acks=1</td>
+<td>Default</td>
+<td>It waits for a reply to say that the leader broker has received the message.</td>
+</tr>
+<tr>
+<td>acks=all</td>
+<td>Most reliable</td>
+<td>It waits for a reply to say that all the in-sync replica brokers have received the message.</td>
+</tr>
+</tbody></table></div>
+<h4 id="delivery-semantics">Delivery semantics</h4>
+<p>Kafka offers the following multiple different message delivery semantics:</p>
+<ul>
+<li>At most once: messages might get lost, and won&#8217;t get redelivered</li>
+<li>At least once: messages are never lost, but there might be duplicates</li>
+<li>Exactly once: messages are never lost, and there are no duplicates</li>
+</ul>
+<p>The delivery semantics are determined by the following settings:</p>
+<ul>
+<li><code style="font-family:monospace;font-size:1rem">acks</code></li>
+<li><code style="font-family:monospace;font-size:1rem">retries</code></li>
+<li><code style="font-family:monospace;font-size:1rem">enable.idempotence</code></li>
+</ul>
+<p>By default, Kafka uses &#8220;at least once&#8221; semantics.</p>
+<p>To enable &#8220;exactly once&#8221; semantics, you must use the <code style="font-family:monospace;font-size:1rem">idempotent</code> or <code style="font-family:monospace;font-size:1rem">transactional</code> producers. The transactional producer is enabled by setting <code style="font-family:monospace;font-size:1rem">enable.idempotence</code> to <code style="font-family:monospace;font-size:1rem">true</code>, and it guarantees that exactly one copy of each message is written to Kafka, even if it retries. The transactional producer enables the sending of data to multiple partitions such that either all messages are successfully delivered or none of them are. That is, a transaction is either fully committed or fully discarded. You can also include offsets in transactions to enable you to build applications that read, process, and write messages to Kafka.</p>
+<h3 id="consumers">Consumers</h3>
+<p>A consumer is an application that consumes streams of messages from Kafka topics. A consumer can read messages from one or more topics and processes them.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/consumer-concept.png" alt="Consumer Concept"/></p>
+<p>When a consumer connects to Kafka, it makes an initial bootstrap connection. This connection can be to any of the servers in the cluster. The consumer requests information about the topic that it wants to consume from so that it knows which broker and partition it needs to connect to.</p>
+<p>Then the consumer establishes another connection to the partition leader and can begin to consume messages. These actions happen automatically internally when your consumer connects to the Kafka cluster.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/consumer.png" alt="Consumer"/></p>
+<p>A consumer is normally a long-running application. A consumer requests messages from Kafka by calling <code style="font-family:monospace;font-size:1rem">Consumer.poll(...)</code> regularly. The consumer calls <code style="font-family:monospace;font-size:1rem">poll()</code>, receives a batch of messages, processes them promptly, and then calls <code style="font-family:monospace;font-size:1rem">poll()</code> again.</p>
+<p>When a consumer processes a message, the message is not removed from its topic. Instead, consumers can choose from several ways of letting Kafka know which messages have been processed. This process is known as &#8220;committing the offset.&#8221;</p>
+<p>The difference between a consumer&#8217;s current position and the newest message on a partition is known as the offset lag. If the lag increases over time, it is a sign that the consumer is not able to keep up. Over the short term, this is not an issue, but eventually the consumer could miss messages if the retention period is exceeded.</p>
+<h4 id="consumer-groups">Consumer Groups</h4>
+<p>A consumer group contains one or more consumers that work together to process the messages. The messages from a single partition are processed by one consumer in each group.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/consumer-group.png" alt="Consumer Group"/></p>
+<p>At any time, each partition is assigned to only one consumer in the group. This assignment ensures that the messages on each partition are processed in order.</p>
+<p>If there are more partitions than consumers in a group, some consumers have multiple partitions. If there are more consumers than partitions, some consumers have no partitions. Therefore the number of partitions influences the balancing of workload among consumers.</p>
+<p>The consumers in a group all use the same value for the <code style="font-family:monospace;font-size:1rem">group.id</code> configuration. If you need more than one consumer to handle your workload, you can run multiple consumers in the same consumer group. Even if you only need one consumer, it&#8217;s usual to also specify a value for <code style="font-family:monospace;font-size:1rem">group.id</code>.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/consumer-group-example.png" alt="Consumer Group"/></p>
+<p>Each consumer group has a server in the cluster called the coordinator that is responsible for assigning partitions to the consumers in the group. This responsibility is spread across the servers in the cluster to even the load. The assignment of partitions to consumers can change at every group rebalance.</p>
+<p>When one of the following changes takes place in a consumer group, the group rebalances by shifting the assignment of partitions to the group members to accommodate the change:</p>
+<ul>
+<li>A consumer joins the group</li>
+<li>A consumer leaves the group</li>
+<li>A consumer is considered as no longer live by the coordinator</li>
+<li>New partitions are added to an existing topic</li>
+</ul>
+<p>For each consumer group, Kafka remembers the committed offset for each partition being consumed.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/consumer-offset.png" alt="Consumer Offset"/></p>
+<p>If you have a consumer group that has rebalanced, be aware that any consumer that has left the group will have its commits rejected until it rejoins the group. In this case, the consumer needs to rejoin the group, where it might be assigned a different partition to the one it was previously consuming from.</p>
+<p>Consumer groups can also be managed using <a href="https://cloud.ibm.com/docs/EventStreams?topic=EventStreams-kafka_console_tools">Kafka console tools</a> or <a href="https://cloud.ibm.com/docs/EventStreams?topic=EventStreams-kafka_using">Kafka Admin API</a>.</p>
+<h4 id="consumer-liveness">Consumer liveness</h4>
+<p>Kafka automatically detects failed consumers so that it can reassign partitions to working consumers. It uses two mechanisms to achieve this: polling and heartbeating.</p>
+<p>If the batch of messages returned from <code style="font-family:monospace;font-size:1rem">Consumer.poll(...)</code>is large or the processing is time-consuming, the delay before calling <code style="font-family:monospace;font-size:1rem">poll()</code> again can be significant or unpredictable. In some cases, it&#8217;s necessary to configure a long maximum polling interval so that consumers do not get removed from their groups just because message processing is taking a while. If this were the only mechanism, it would mean that the time taken to detect a failed consumer would also be long.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/consumer-liveness.png" alt="Consumer liveness"/></p>
+<p>The group coordinator expects group members to send it regular heartbeats to indicate that they remain active. A background heartbeat thread runs in the consumer sending regular heartbeats to the coordinator. If the coordinator does not receive a heartbeat from a group member within the session timeout, the coordinator removes the member from the group and starts a rebalance of the group. The session timeout can be much shorter than the maximum polling interval so that the time taken to detect a failed consumer can be short even if message processing takes a long time.</p>
+<p>You can configure the maximum polling interval using the <code style="font-family:monospace;font-size:1rem">max.poll.interval.ms</code> property and the session timeout using the <code style="font-family:monospace;font-size:1rem">session.timeout.ms</code> property. You will typically not need to use these settings unless it takes more than 5 minutes to process a batch of messages.</p>
+<h2 id="kafka-streams">Kafka Streams</h2>
+<p>Kafka Streams is a stream processing library that is part of the Apache Kafka project. It is an open source Java API that simplifies the building of applications that process and analyze data in Kafka.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/kafka-streams.png" alt="Kafka Streams"/></p>
+<p>A Kafka Streams app can take input of one or more topics, and can output zero or more topics. In the following example, the Kafka Streams app takes the messages with value of foo, bar, and so on, and keys such as red, orange, and so on. It then filters to find all messages with a key of bingo, and then applies a map to uppercase the values. Then, it pushes the messages onto the output topic.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/kafkastreams.png" alt="Kafka Stream"/></p>
+<h2 id="kafka-connect">Kafka Connect</h2>
+<p>Kafka Connect is part of the Apache Kafka project and allows connecting external systems to Kafka.</p>
+<p><img class="lazycontent" data-src="https://developer.ibm.com/developer/default/articles/event-streams-kafka-fundamentals/images/kafka-connector.png" alt="Kafka Connector"/></p>
+<p>It consists of a runtime that can run connectors to copy data to and from a cluster. Its main characteristics are:</p>
+<ul>
+<li>Scalability: It can easily scale from a single worker to many.</li>
+<li>Reliability: It automatically manages offsets and the lifecycle of connectors.</li>
+<li>Extensibility: The community has built connectors for most popular systems.</li>
+</ul>
+<p>IBM has connectors for <a href="https://cloud.ibm.com/docs/EventStreams?topic=EventStreams-mq_connector">MQ</a> and <a href="https://cloud.ibm.com/docs/EventStreams?topic=EventStreams-cos_connector">Cloud Object Storage</a>. Many connectors are available and are often open source.</p>
+<h2 id="summary-and-next-steps">Summary and next steps</h2>
+<p>Now that you know some of the common use cases and the fundamental concepts of Kafka, you can dig in a little deeper on these Apache Kafka concepts:</p>
+<ul>
+<li><a href="/articles/how-persistence-works-in-apache-kafka/">Topics, partitions, and persistence</a></li>
+<li><a href="/tutorials/kafka-authn-authz/">Authentication and authorization</a></li>
+</ul>                        <footer class="code--entry-footer"></footer>          </section>
+        </div>
+        <div class="bx--col-md-4 bx--col-lg-4 bx--offset-lg-1 bx--offset-md-1">
+          <section class="cpt-aside">
+            <nav class="cpt-social " role="navigation" aria-label="Social sharing">
+	            <h5>Share our content</h5>
+	            <ul>
+	              <li>
+									<a title="Share this on Facebook" onclick="return ibmcode.socialpopup(event,this);" target="_blank" class="ibm-facebook-encircled-link" href="http://www.facebook.com/sharer.php?u=https%3A%2F%2Fdeveloper.ibm.com%2Farticles%2Fevent-streams-kafka-fundamentals%2F&amp;t=Apache+Kafka+fundamentals" data-id="facebook">
+										<i class="ibm-access">Facebook</i>
+										<svg title="Share this on Facebook" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+		                  <title>Share this on Facebook</title>
+		                  <path  d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/>
+		                </svg>
+									</a>
+								</li>
+								<li>
+									<a title="Share this on Twitter" onclick="return ibmcode.socialpopup(event,this);" target="_blank" class="ibm-twitter-encircled-link" href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fdeveloper.ibm.com%2Farticles%2Fevent-streams-kafka-fundamentals%2F&amp;text=Apache+Kafka+fundamentals" data-id="twitter">
+										<i class="ibm-access">Twitter</i>
+										<svg title="Share this on Twitter" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+											<title>Share this on Twitter</title>
+											<path  d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
+										</svg>
+									</a>
+								</li>
+								<li>
+									<a title="Share this on LinkedIn" onclick="return ibmcode.socialpopup(event,this);" target="_blank" class="ibm-linkedin-encircled-link" href="http://www.linkedin.com/shareArticle?mini=true&amp;url=https%3A%2F%2Fdeveloper.ibm.com%2Farticles%2Fevent-streams-kafka-fundamentals%2F&amp;title=Apache+Kafka+fundamentals" data-id="linkedin">
+										<i class="ibm-access">Linked In</i>
+										<svg title="Share this on LinkedIn" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+											<title>Share this on LinkedIn</title>
+											<path  d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/>
+										</svg>
+									</a>
+								</li>
+								<li>
+									<a title="Share this on WeChat" onclick="return ibmcode.socialpopup(event,this);" target="_blank" class="ibm-googleplus-encircled-link" href="https://developer.ibm.com/articles/event-streams-kafka-fundamentals/" data-id="qrcode">
+									  <i class="ibm-access">WeChat</i>
+										<svg title="Share this on WeChat" viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd">
+											<title>Share this on WeChat</title>
+											<path  d="M21.502 19.525c1.524-1.105 2.498-2.738 2.498-4.554 0-3.326-3.237-6.023-7.229-6.023s-7.229 2.697-7.229 6.023c0 3.327 3.237 6.024 7.229 6.024.825 0 1.621-.117 2.36-.33l.212-.032c.139 0 .265.043.384.111l1.583.914.139.045c.133 0 .241-.108.241-.241l-.039-.176-.326-1.215-.025-.154c0-.162.08-.305.202-.392zm-12.827-17.228c-4.791 0-8.675 3.236-8.675 7.229 0 2.178 1.168 4.139 2.997 5.464.147.104.243.276.243.471l-.03.184-.391 1.458-.047.211c0 .16.13.29.289.29l.168-.054 1.899-1.097c.142-.082.293-.133.46-.133l.255.038c.886.255 1.842.397 2.832.397l.476-.012c-.188-.564-.291-1.158-.291-1.771 0-3.641 3.542-6.593 7.911-6.593l.471.012c-.653-3.453-4.24-6.094-8.567-6.094zm5.686 11.711c-.532 0-.963-.432-.963-.964 0-.533.431-.964.963-.964.533 0 .964.431.964.964 0 .532-.431.964-.964.964zm4.82 0c-.533 0-.964-.432-.964-.964 0-.533.431-.964.964-.964.532 0 .963.431.963.964 0 .532-.431.964-.963.964zm-13.398-5.639c-.639 0-1.156-.518-1.156-1.156 0-.639.517-1.157 1.156-1.157.639 0 1.157.518 1.157 1.157 0 .638-.518 1.156-1.157 1.156zm5.783 0c-.639 0-1.156-.518-1.156-1.156 0-.639.517-1.157 1.156-1.157.639 0 1.157.518 1.157 1.157 0 .638-.518 1.156-1.157 1.156z"/>
+										</svg>
+									</a>
+								</li>
+								<li>
+									<a title="Share this on Weibo" onclick="return ibmcode.socialpopup(event,this);" target="_blank" class="ibm-googleplus-encircled-link" href="http://service.weibo.com/share/share.php?title=Apache+Kafka+fundamentals&url=https%3A%2F%2Fdeveloper.ibm.com%2Farticles%2Fevent-streams-kafka-fundamentals%2F&pic=" data-id="weibo">
+									  <i class="ibm-access">Weibo</i>
+										<svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+											<path  d="M9.03513664,18.4132231 C9.22253207,18.0385675 9.27161182,17.6584022 9.18237591,17.2727273 C9.09313999,16.8870523 8.89235917,16.6115702 8.58003346,16.446281 C8.27663134,16.292011 7.95092025,16.2865014 7.60290017,16.4297521 C7.25488009,16.5730028 6.98717234,16.8264463 6.79977691,17.1900826 C6.60345789,17.5647383 6.54545455,17.9421488 6.62576687,18.322314 C6.7060792,18.7024793 6.89793642,18.9807163 7.20133854,19.1570248 C7.50474066,19.3333333 7.83714445,19.3471074 8.19854992,19.1983471 C8.55995538,19.0495868 8.83881762,18.7878788 9.03513664,18.4132231 Z M10.2933631,16.4132231 C10.3647518,16.2699725 10.3803681,16.1239669 10.3402119,15.9752066 C10.3000558,15.8264463 10.2219743,15.7245179 10.1059677,15.6694215 C9.98103737,15.6143251 9.85387619,15.6170799 9.7244841,15.677686 C9.59509202,15.738292 9.49916341,15.8402204 9.43669827,15.9834711 C9.28499721,16.3250689 9.34300056,16.5730028 9.61070831,16.7272727 C9.73563859,16.7823691 9.86503067,16.7796143 9.99888455,16.7190083 C10.1327384,16.6584022 10.2308979,16.5564738 10.2933631,16.4132231 Z M12.6224205,18.1818182 C12.2208589,19.3057851 11.5158951,20.1322314 10.5075293,20.661157 C9.49916341,21.1900826 8.49972114,21.2561983 7.50920245,20.8595041 C6.55437814,20.4848485 5.89626325,19.7878788 5.53485778,18.768595 C5.17345231,17.7493113 5.20245399,16.7162534 5.6218628,15.6694215 C6.04127161,14.6446281 6.71723369,13.8787879 7.64974902,13.3719008 C8.58226436,12.8650138 9.52147239,12.7603306 10.4673731,13.0578512 C11.4578918,13.3774105 12.1650864,14.0358127 12.5889571,15.0330579 C13.0128277,16.030303 13.0239822,17.0798898 12.6224205,18.1818182 Z M16.7986615,15.5371901 C16.7183491,14.4793388 16.3212493,13.5426997 15.607362,12.7272727 C14.8934746,11.9118457 13.9631902,11.3112948 12.8165086,10.9256198 C11.6698271,10.5399449 10.4450641,10.4242424 9.14221974,10.5785124 C7.15225878,10.8319559 5.50362521,11.6115702 4.19631902,12.9173554 C2.88901283,14.2231405 2.29782487,15.6804408 2.42275516,17.2892562 C2.50306748,18.3471074 2.90016732,19.2837466 3.61405466,20.0991736 C4.327942,20.9146006 5.25822644,21.5151515 6.40490798,21.9008264 C7.55158951,22.2865014 8.77635248,22.4022039 10.0791969,22.2479339 C12.0691578,21.9944904 13.7177914,21.214876 15.0250976,19.9090909 C16.3324038,18.6033058 16.9235917,17.1460055 16.7986615,15.5371901 Z M20.9213608,15.6033058 C20.9213608,16.3526171 20.7562744,17.1212121 20.4261015,17.9090909 C20.0959286,18.6969697 19.6095929,19.4517906 18.9670943,20.1735537 C18.3245956,20.8953168 17.572783,21.5426997 16.7116564,22.1157025 C15.8505298,22.6887052 14.842164,23.1460055 13.6865588,23.4876033 C12.5309537,23.8292011 11.3240379,24 10.0658115,24 C8.80758505,24 7.58059119,23.815427 6.38482989,23.446281 C5.1890686,23.077135 4.11600669,22.5647383 3.16564417,21.9090909 C2.21528165,21.2534435 1.45008366,20.4214876 0.870050195,19.4132231 C0.290016732,18.4049587 0,17.3057851 0,16.1157025 C0,14.8484848 0.310094813,13.4986226 0.930284439,12.0661157 C1.55047407,10.6336088 2.43167875,9.21212121 3.57389849,7.80165289 C5.0819855,5.93939394 6.60568879,4.63911846 8.14500837,3.90082645 C9.68432794,3.16253444 10.7841606,3.20110193 11.4445064,4.01652893 C12.0245399,4.72176309 12.1137758,5.87327824 11.7122142,7.47107438 C11.6765198,7.62534435 11.672058,7.73553719 11.6988288,7.80165289 C11.7255996,7.8677686 11.7702175,7.90633609 11.8326827,7.91735537 C11.8951478,7.92837466 11.9598438,7.92561983 12.0267708,7.90909091 C12.0936977,7.89256198 12.153932,7.87327824 12.2074735,7.85123967 L12.2877858,7.81818182 C13.5281651,7.16804408 14.6257669,6.84297521 15.5805912,6.84297521 C16.5354155,6.84297521 17.2180703,7.17906336 17.6285555,7.85123967 C18.0301171,8.54545455 18.0301171,9.5261708 17.6285555,10.7933884 C17.6107083,10.9366391 17.5906302,11.046832 17.5683212,11.1239669 C17.5460123,11.2011019 17.5660904,11.2699725 17.6285555,11.3305785 C17.6910206,11.3911846 17.7445622,11.4325069 17.7891801,11.4545455 C17.8337981,11.476584 17.9096486,11.5096419 18.0167317,11.553719 C18.5253765,11.7520661 18.9849414,12.0110193 19.3954267,12.3305785 C19.8059119,12.6501377 20.1628555,13.0991736 20.4662577,13.677686 C20.7696598,14.2561983 20.9213608,14.8980716 20.9213608,15.6033058 Z M19.9308422,5.2892562 C20.305633,5.80716253 20.5488009,6.40495868 20.6603458,7.08264463 C20.7718907,7.76033058 20.742889,8.4077135 20.5733408,9.02479339 C20.501952,9.27823691 20.3703291,9.46556474 20.1784718,9.58677686 C19.9866146,9.70798898 19.7880647,9.73002755 19.5828221,9.65289256 C19.3775795,9.56473829 19.2258784,9.40220386 19.1277189,9.16528926 C19.0295594,8.92837466 19.0117122,8.68319559 19.0741774,8.42975207 C19.2526492,7.73553719 19.1455661,7.12396694 18.7529281,6.59504132 C18.36029,6.0661157 17.8828779,5.87327824 17.3206916,6.01652893 C17.1065254,6.07162534 16.9057446,6.02754821 16.7183491,5.88429752 C16.5309537,5.74104683 16.4194088,5.53719008 16.3837144,5.27272727 C16.3390965,5.00826446 16.3747909,4.7630854 16.4907975,4.53719008 C16.6068042,4.31129477 16.7718907,4.1707989 16.9860569,4.11570248 C17.5214724,3.97245179 18.0524261,4.00275482 18.578918,4.20661157 C19.1054099,4.41046832 19.5560513,4.77134986 19.9308422,5.2892562 Z M22.3535973,2.59504132 C23.1299498,3.65289256 23.6319018,4.87878788 23.8594534,6.27272727 C24.087005,7.66666667 24.0267708,8.99724518 23.6787507,10.2644628 C23.5984384,10.5619835 23.4467373,10.7823691 23.2236475,10.9256198 C23.0005577,11.0688705 22.7685443,11.0909091 22.5276074,10.9917355 C22.2866704,10.892562 22.1081985,10.7052342 21.9921919,10.4297521 C21.8761852,10.15427 21.8538762,9.8677686 21.9252649,9.57024793 C22.1751255,8.66666667 22.2197434,7.71900826 22.0591188,6.72727273 C21.8984941,5.73553719 21.5415505,4.86501377 20.9882878,4.11570248 C20.4350251,3.3553719 19.7746793,2.8292011 19.0072504,2.53719008 C18.2398215,2.24517906 17.4679308,2.19834711 16.6915784,2.39669421 C16.4417178,2.46280992 16.2097044,2.41046832 15.9955382,2.23966942 C15.781372,2.06887052 15.6475181,1.8292011 15.5939766,1.52066116 C15.540435,1.21212121 15.5828221,0.928374656 15.7211378,0.669421488 C15.8594534,0.41046832 16.0535416,0.247933884 16.3034021,0.181818182 C17.4010039,-0.104683196 18.4896821,-0.041322314 19.5694367,0.371900826 C20.6491913,0.785123967 21.5772448,1.5261708 22.3535973,2.59504132 Z" id="Shape"></path>
+											</svg>
+									</a>
+								</li>
+							</ul>
+						</nav><nav class="cpt-categoryNav sb-resources">
+							 <ul data-accordion class="bx--accordion">
+								 <li data-accordion-item class="bx--accordion__item">
+									 <button class="bx--accordion__heading" aria-expanded="false" aria-controls="pane4">
+										 <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--accordion__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M11 8l-5 5-.7-.7L9.6 8 5.3 3.7 6 3z"></path></svg>
+											 <div class="bx--accordion__title">This content also appears in:</div>
+									 </button>
+									 <div id="pane4" class="bx--accordion__content">
+										 <h4 style="font-weight: bold">Learning Paths</h4><ul><li><a href="/learningpaths/develop-kafka-apps/">Develop production-ready, Apache Kafka apps</a></li><li><a href="/learningpaths/ibm-event-streams-badge/">IBM Event Streams Developer Essentials Badge</a></li></ul>
+									 </div>
+								 </li>
+							 </ul>
+						 </nav><div id="categories-label" class="bx--tooltip__label">Legend
+  <button aria-expanded="false" aria-labelledby="categories-label" data-tooltip-trigger data-tooltip-target="#example-s35pjmk3z"
+    class="bx--tooltip__trigger" aria-controls="example-s35pjmk3z" aria-haspopup="true">
+    <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8.5 11L8.5 6.5 6.5 6.5 6.5 7.5 7.5 7.5 7.5 11 6 11 6 12 10 12 10 11zM8 3.5c-.4 0-.8.3-.8.8S7.6 5 8 5c.4 0 .8-.3.8-.8S8.4 3.5 8 3.5z"></path><path d="M8,15c-3.9,0-7-3.1-7-7s3.1-7,7-7s7,3.1,7,7S11.9,15,8,15z M8,2C4.7,2,2,4.7,2,8s2.7,6,6,6s6-2.7,6-6S11.3,2,8,2z"></path></svg>
+  </button>
+</div>
+<div id="example-s35pjmk3z" aria-hidden="true" data-floating-menu-direction="left" class="bx--tooltip" >
+  <span class="bx--tooltip__caret"></span>
+  <div class="cat-helper bx--tooltip__content" tabindex="-1" role="dialog" aria-describedby="example-s35pjmk3z-body" aria-labelledby="categories-label">
+    <ul><li class="dadot"><span class="bx--tag bx--tag--teal"></span>Products &amp; Services</li></ul>
+    <div class="bx--tooltip__footer">
+
+    </div>
+  </div>
+  <!-- Note: focusable span allows for focus wrap feature within Tooltips -->
+  <span tabindex="0"></span>
+</div><nav class="cpt-categoryNav"><ul data-accordion class="bx--accordion"><li data-accordion-item class="bx--accordion__item bx--accordion__item--active">
+					      <button class="bx--accordion__heading" aria-expanded="true" aria-controls="pane1">
+					        <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--accordion__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M11 8l-5 5-.7-.7L9.6 8 5.3 3.7 6 3z"></path></svg>
+					        <div class="bx--accordion__title">Categories</div>
+					      </button>
+								<div id="pane1" class="bx--accordion__content"><a href="https://developer.ibm.com/components/kafka/" class="bx--tag bx--tag--teal">Apache Kafka</a></div></li></ul></nav><nav class="cpt-categoryNav sb-navigation">
+            <ul data-accordion class="bx--accordion">
+              <li data-accordion-item class="bx--accordion__item">
+                <button class="bx--accordion__heading" aria-expanded="false" aria-controls="pane2">
+                  <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" class="bx--accordion__arrow" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M11 8l-5 5-.7-.7L9.6 8 5.3 3.7 6 3z"></path></svg>
+                    <div class="bx--accordion__title">Table of Contents</div>
+                </button>
+					      <div id="pane2" class="bx--accordion__content">
+                  <ul>
+<li><a href="#common-use-cases">Common use cases</a></li>
+<li><a href="#key-concepts-of-apache-kafka">Key concepts of Apache Kafka</a></li>
+<ul>
+<li><a href="#brokers">Brokers</a></li>
+<li><a href="#messages">Messages</a></li>
+<li><a href="#topics-and-partitions">Topics and partitions</a></li>
+<li><a href="#replication">Replication</a></li>
+</ul>
+<li><a href="#apache-kafka-clients">Apache Kafka clients</a></li>
+<ul>
+<li><a href="#producers">Producers</a></li>
+<ul>
+<li><a href="#message-ordering">Message ordering</a></li>
+<li><a href="#message-acknowledgments">Message acknowledgments</a></li>
+<li><a href="#delivery-semantics">Delivery semantics</a></li>
+</ul>
+<li><a href="#consumers">Consumers</a></li>
+<ul>
+<li><a href="#consumer-groups">Consumer Groups</a></li>
+<li><a href="#consumer-liveness">Consumer liveness</a></li>
+</ul>
+</ul>
+<li><a href="#kafka-streams">Kafka Streams</a></li>
+<li><a href="#kafka-connect">Kafka Connect</a></li>
+<li><a href="#summary-and-next-steps">Summary and next steps</a></li>
+</ul>
+
+                </div>
+              </li>
+            </ul>
+          </nav>          </section>
+        </div>
+      </div>
+    </div>
+      </div>
+</div>
+<!-- end new layout -->
+<div class="cpt__related_content">
+         <div class="inner">
+           <!-- -->
+           <div class="bx--grid" style="padding-left: 0;padding-right:0;">
+             <div class="bx--row">
+               <div class="bx--col-md-12 bx--col-lg-12">
+
+                 <div data-tabs class="bx--tabs">
+                   <div class="bx--tabs-trigger" tabindex="0">
+                     <a href="javascript:void(0)" class="bx--tabs-trigger-text" tabindex="-1"></a>
+                     <svg focusable="false" preserveAspectRatio="xMidYMid meet" style="will-change: transform;" xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M5 6L0 1 .7.3 5 4.6 9.3.3l.7.7z"></path></svg>
+                   </div>
+                   <ul class="bx--tabs__nav bx--tabs__nav--hidden" role="tablist">
+                     <li
+                       class="bx--tabs__nav-item bx--tabs__nav-item--selected "
+                       data-target=".tab-1" role="presentation">
+                       <a tabindex="0" id="tab-link-1" class="bx--tabs__nav-link" href="javascript:void(0)" role="tab" aria-controls="tab-panel-1"  aria-selected="true">Related</a>
+                     </li>
+                     <li
+                       class="bx--tabs__nav-item "
+                       data-target=".tab-2" role="presentation">
+                       <a tabindex="0" id="tab-link-2" class="bx--tabs__nav-link" href="javascript:void(0)" role="tab" aria-controls="tab-panel-2">Recommended</a>
+                     </li>
+                   </ul>
+                 </div>
+                   <div id="tab-panel-1" class="tab-1 bx--tab-content" role="tabpanel" aria-labelledby="tab-link-1" aria-hidden="false">
+                       <div class="bx--row bx--no-gutter--right"><div class="bx--col-sm-12 bx--col-md-4 bx--col-lg-4"><div class="developer--card bx--tile ibmcode_articles">
+          <a class="developer--card__block_link"  href="/articles/an-introduction-to-apache-kafka/">
+            
+            <h5 class="developer--card__type">
+              <span>Article</span>
+            </h5>
+            <div class="developer--card__body">
+              
+              <h3 class="developer--card__title"><span>What is Apache Kafka?</span></h3>
+              
+            </div>
+            <div class="developer--card__bottom">
+              <p><span class="developer--card__date">April 9, 2020</span></p>
+              <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="will-change: transform;"><path d="M14 4l-1.1 1.1 6 6.1H2v1.6h16.9l-6 6.1L14 20l8-8z"></path></svg>
+            </div>
+          </a>
+        </div></div><div class="bx--col-sm-12 bx--col-md-4 bx--col-lg-4"><div class="developer--card bx--tile ibmcode_tutorials">
+          <a class="developer--card__block_link"  href="/tutorials/get-started-with-apache-kafka/">
+            
+            <h5 class="developer--card__type">
+              <span>Tutorial</span>
+            </h5>
+            <div class="developer--card__body">
+              
+              <h3 class="developer--card__title"><span>Workshop: Get started with Apache Kafka</span></h3>
+              
+            </div>
+            <div class="developer--card__bottom">
+              <p><span class="developer--card__date">October 27, 2020</span></p>
+              <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="will-change: transform;"><path d="M14 4l-1.1 1.1 6 6.1H2v1.6h16.9l-6 6.1L14 20l8-8z"></path></svg>
+            </div>
+          </a>
+        </div></div></div>
+                   </div>
+                   <div id="tab-panel-2" class="tab-2 bx--tab-content" role="tabpanel" aria-labelledby="tab-link-2" aria-hidden="true" hidden>
+                       <div class="bx--row bx--no-gutter--right"><div class="bx--col-sm-12 bx--col-md-4 bx--col-lg-4"><div class="developer--card bx--tile ibmcode_tutorials">
+          <a class="developer--card__block_link"  href="/tutorials/build-a-water-quality-dashboard/">
+            
+            <h5 class="developer--card__type">
+              <span>Tutorial</span>
+            </h5>
+            <div class="developer--card__body">
+              
+              <h3 class="developer--card__title"><span>Build a water quality dashboard with GeoJSON and Node-RED</span></h3>
+              
+            </div>
+            <div class="developer--card__bottom">
+              <p><span class="developer--card__date">March 17, 2021</span></p>
+              <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="will-change: transform;"><path d="M14 4l-1.1 1.1 6 6.1H2v1.6h16.9l-6 6.1L14 20l8-8z"></path></svg>
+            </div>
+          </a>
+        </div></div><div class="bx--col-sm-12 bx--col-md-4 bx--col-lg-4"><div class="developer--card bx--tile ibmcode_conferences hasimage">
+          <a class="developer--card__block_link"  href="/conferences/digital-developer-conference-ai-automation-integration/">
+            <div class="developer--card__image" style="background: transparent url(https://developer.ibm.com/developer/default/conferences/digital-developer-conference-ai-automation-integration/card.jpg) no-repeat 0 0 / cover;"></div>
+            <h5 class="developer--card__type">
+              <span>Conference</span>
+            </h5>
+            <div class="developer--card__body">
+              
+              <h3 class="developer--card__title"><span>Digital Developer Conference: AIOps & Integration</span></h3>
+              
+            </div>
+            <div class="developer--card__bottom">
+              <p><span class="ibm--card__date"><svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><path d="M26 4.03h-4v-2h-2v2h-8v-2h-2v2H6a2 2 0 0 0-2 2v20a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2v-20a2 2 0 0 0-2-2zm0 22H6v-14h20zm0-16H6v-4h4v2h2v-2h8v2h2v-2h4z"></path></svg> April 20, 2021</span></p>
+              <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="will-change: transform;"><path d="M14 4l-1.1 1.1 6 6.1H2v1.6h16.9l-6 6.1L14 20l8-8z"></path></svg>
+            </div>
+          </a>
+        </div></div><div class="bx--col-sm-12 bx--col-md-4 bx--col-lg-4"><div class="developer--card bx--tile ibmcode_articles">
+          <a class="developer--card__block_link"  href="/articles/fun-with-dates-and-times/">
+            
+            <h5 class="developer--card__type">
+              <span>Article</span>
+            </h5>
+            <div class="developer--card__body">
+              
+              <h3 class="developer--card__title"><span>Fun with dates and times</span></h3>
+              
+            </div>
+            <div class="developer--card__bottom">
+              <p><span class="developer--card__date">August 27, 2003</span></p>
+              <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="will-change: transform;"><path d="M14 4l-1.1 1.1 6 6.1H2v1.6h16.9l-6 6.1L14 20l8-8z"></path></svg>
+            </div>
+          </a>
+        </div></div><div class="bx--col-sm-12 bx--col-md-4 bx--col-lg-4"><div class="developer--card bx--tile ibmcode_articles">
+          <a class="developer--card__block_link"  href="/articles/what-is-curl-command/">
+            
+            <h5 class="developer--card__type">
+              <span>Article</span>
+            </h5>
+            <div class="developer--card__body">
+              
+              <h3 class="developer--card__title"><span>What is cURL and how does it relate to APIs?</span></h3>
+              
+            </div>
+            <div class="developer--card__bottom">
+              <p><span class="developer--card__date">February 23, 2021</span></p>
+              <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="will-change: transform;"><path d="M14 4l-1.1 1.1 6 6.1H2v1.6h16.9l-6 6.1L14 20l8-8z"></path></svg>
+            </div>
+          </a>
+        </div></div><div class="bx--col-sm-12 bx--col-md-4 bx--col-lg-4"><div class="developer--card bx--tile ibmcode_tutorials">
+          <a class="developer--card__block_link"  href="/tutorials/building-integrations-with-app-connect/">
+            
+            <h5 class="developer--card__type">
+              <span>Tutorial</span>
+            </h5>
+            <div class="developer--card__body">
+              
+              <h3 class="developer--card__title"><span>Building integrations with event-driven flows or flows for APIs</span></h3>
+              
+            </div>
+            <div class="developer--card__bottom">
+              <p><span class="developer--card__date">March 5, 2021</span></p>
+              <svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="will-change: transform;"><path d="M14 4l-1.1 1.1 6 6.1H2v1.6h16.9l-6 6.1L14 20l8-8z"></path></svg>
+            </div>
+          </a>
+        </div></div></div>
+
+                   </div>
+           </div>
+           </div>
+               </div>
+           <!-- -->
+         </div>
+       </div></div>
+</div>
+</div>
+
+<div class="container_footer">
+	<footer role="contentinfo" aria-label="IBM Developer Footer">
+    		<!-- developer footer here -->
+		<div id="code-footer"class="code-footer">
+      <div class="ibm-logo">
+        <a href="//www.ibm.com">
+          <svg class="Footer-module--logo--3otJM" width="81" height="32" xmlns="http://www.w3.org/2000/svg"><g fill-rule="evenodd"><path d="M0 32h15.689v-2.038H0zM0 27.721h15.689v-2.038H0zM4.483 23.442h6.724v-2.037H4.483zM4.483 19.164h6.724v-2.038H4.483zM4.483 14.885h6.724v-2.037H4.483zM4.482 10.606h6.724V8.568H4.482zM0 6.327h15.689V4.29H0zM0 2.049h15.689V.011H0zM17.93 29.963V32h16.504a8.521 8.521 0 0 0 5.54-2.037H17.93zM17.93 25.683v2.038h23.914a8.535 8.535 0 0 0 .85-2.038H17.93zM22.412 23.442h6.724v-2.037h-6.724zM40.124 17.126H22.412v2.038H41.77a8.62 8.62 0 0 0-1.645-2.038M22.413 12.848v2.036h17.786a8.612 8.612 0 0 0 1.644-2.037h-19.43zM42.693 6.327a8.447 8.447 0 0 0-.85-2.037H17.93v2.037h24.763zM39.974 2.049a8.521 8.521 0 0 0-5.54-2.037H17.93v2.037h22.044zM22.412 10.606h6.724V8.568h-6.724zM35.453 10.606h7.29a8.603 8.603 0 0 0 .248-2.038h-7.538v2.038zM35.453 21.405v2.037h7.538c0-.703-.09-1.384-.248-2.037h-7.29zM57.457 0H44.825v2.038h13.34zM44.826 32h11.21v-2.038h-11.21zM44.826 27.72h11.21v-2.038h-11.21zM49.309 23.439h6.727v-2.038h-6.727zM49.309 19.159h6.727v-2.038h-6.727zM69.488 32h11.21v-2.038h-11.21zM69.488 27.72h11.21v-2.038h-11.21zM69.488 23.439h6.726v-2.038h-6.726zM69.487 19.159h6.726v-2.038h-6.726zM69.488 14.879h6.726V12.84H63.606l-.707 2.038h5.903l.686-1.94zM61.916 12.84H49.31v2.039h6.726v-1.94l.686 1.94h5.903zM76.213 8.56H65.091l-.707 2.038h11.83zM68.06 0l-.706 2.038h13.344V0zM62.757 32l.72-2.038h-1.432zM61.254 27.72h3.015l.72-2.038h-4.455zM59.743 23.44h6.037l.72-2.039h-7.476zM58.232 19.159h9.06l.719-2.038h-10.5zM49.309 10.598h11.83l-.707-2.038H49.309zM65.868 6.318h14.83V4.28H66.576zM58.947 4.28H44.826v2.038h14.828z"></path></g></svg>
+        </a>
+        <div class="slogan">
+          <a href="https://developer.ibm.com">
+            <span>
+              <span>Build</span>
+              <span>Smart<svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><polygon points="24.59 16.59 17 24.17 17 2 15 2 15 24.17 7.41 16.59 6 18 16 28 26 18 24.59 16.59"></polygon><title>Arrow down</title></svg></span>
+            </span>
+            <span>
+              <span>Build</span>
+              <span>Secure<svg focusable="false" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" aria-hidden="true" style="will-change: transform;"><polygon points="16 4 6 14 7.41 15.41 15 7.83 15 30 17 30 17 7.83 24.59 15.41 26 14 16 4"></polygon><title>Arrow up</title></svg></span>
+            </span>
+          </a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <div class="bx--grid">
+					<div class="bx--row">
+            <div class="bx--col-sm-2 bx--col-md-3 bx--col-lg-3">
+              <ul>
+                <li class="heading">IBM Developer</li>
+								<li><a href="/about/?lang=en">About</a></li>
+                      <li><a href="/feedback/">FAQ</a></li>
+                      <li><a href="/terms/third-party-notice/">Third-party notice</a></li>							</ul>
+						</div>
+            <div class="bx--col-sm-2 bx--col-md-3 bx--col-lg-3">
+							<ul class="tr">
+                <li class="heading">Follow Us</li>
+                <li><a href="https://twitter.com/IBMDeveloper/">Twitter</a></li>
+                <li><a href="https://www.linkedin.com/showcase/developerworks/">LinkedIn</a></li>
+                <li><a href="https://www.facebook.com/IBMDeveloper/">Facebook</a></li>
+                <li><a href="https://www.youtube.com/channel/UCUm6InQvGI9-6vo1teGWINA/">YouTube</a></li>							</ul>
+						</div>
+            <div class="bx--col-sm-2 bx--col-md-3 bx--col-lg-3">
+							<ul>
+								<li class="heading">Explore</li>
+								<li><a href="/newsletters/">Newsletters</a></li>
+                  <li><a href="/patterns/">Code patterns</a></li>
+                  <li><a href="/apis/">APIs</a></li>
+                  <li><a href="/articles/">Articles</a></li>
+                  <li><a href="/tutorials/">Tutorials</a></li>
+                  <li><a href="https://www.ibm.com/opensource/open-projects/">Open source projects</a></li>
+                  <li><a href="/videos/">Videos</a></li>
+                  <li><a href="/events/">Events</a></li>							</ul>
+						</div>
+						<div class="bx--col-sm-2 bx--col-md-3 bx--col-lg-3">
+              <ul class="tr">
+								<li class="heading">Select a language</li>
+								<li><a href="//developer.ibm.com/">English</a></li>
+                  <li><a href="/br/">Português</a></li>
+                  <li><a href="/es/">Español</a></li>							</ul>
+						</div>
+					</div>
+				</div>
+      </div>
+    </div>
+    <!-- end of default footer -->
+    
+			<div class="code_content__wrap">
+
+			</div>
+		</div>
+		<!-- ibm footer here -->
+		<div aria-label="IBM Global Footer" class="dw-footer" id="dw-footer">
+			<div class="code_content__wrap">
+					<div class="dw-footer-corporate-links">
+							<ul>
+									<li><a href="/community/">Community</a></li>
+                  <li><a href="//ibm.com/employment/" target="_blank" rel="noopener noreferrer">Career Opportunites</a></li>
+                  <li><a href="//www.ibm.com/privacy/us/en/" target="_blank" rel="noopener noreferrer">Privacy</a></li>
+                  <li><a href="/terms/ibm-developer-terms-of-use/">Terms of use</a></li>
+                  <li><a href="//www.ibm.com/accessibility/us/en/" target="_blank" rel="noopener noreferrer">Accessibility</a></li>									<li id="ibm-truste-cp"><a onclick="truste.eu.clickListener();return false;" href="#">Cookie preferences</a></li>
+							</ul>
+					</div>
+					<div id="ibm-footer-locale-selector"></div>
+			</div>
+		</div>
+    <button
+          value="Site feedback"
+          id="Site-feedback-btn-id"
+          onclick="KAMPYLE_ONSITE_SDK.showForm(260)"
+          form="myform" style="position: fixed; cursor: pointer; font-weight: 300; font-size: 16px; line-height: 26px; outline: 0px; text-align: center; height: 32px; padding: 0px 16px; right: 0px; top: 150px; bottom: auto; z-index: 800; transform: rotate(-90deg); transform-origin: 100% 100%; background-color: rgb(255, 255, 255); border: 1px solid rgb(15, 98, 254); color: rgb(15, 98, 254); margin: 0px !important;">
+            Site feedback
+        </button>  </footer>
+</div>
+
+<div id="notificationDrawer"></div>
+
+<style>
+	#modal-k7naq0vevup .bx--modal-container,
+  #challengeModal  .bx--modal-container{
+		max-width: 980px !important;
+		padding:0 !important;
+		height: 75% !important;
+	}
+  #challengeModal  .bx--modal-container{
+    height: 90% !important;
+    max-height: 90% !important;
+    border-color: #41a8a5;
+  }
+	#modal-k7naq0vevup .bx--modal-content,
+  #challengeModal .bx--modal-content{
+		margin-bottom: 0;
+		height: 100%;
+	}
+	#modal-k7naq0vevup .bx--modal-container iframe,
+  #challengeModal .bx--modal-container iframe{
+		height:100%;
+	}
+</style>
+
+<div id="challengeModal">
+  <div id="challengeIframeWrap">
+    <div class="challenge--modal-header">
+      <button class="challenge--modal-close" type="button" data-modal-close aria-label="close modal"  data-modal-primary-focus>
+        <svg class="challenge--modal-close__icon" width="10" height="10" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+          <title>Close Modal</title>
+          <path d="M6.32 5L10 8.68 8.68 10 5 6.32 1.32 10 0 8.68 3.68 5 0 1.32 1.32 0 5 3.68 8.68 0 10 1.32 6.32 5z" fill-rule="nonzero"/>
+        </svg>
+      </button>
+    </div>
+    <div class="challenge--modal-content">
+      <iframe id="challengeIframe" src="about:blank" frameborder="0" scrolling="no"></iframe>
+    </div>
+  </div>
+</div>
+
+</div><!-- #page -->
+
+<script defer type='text/javascript' src='https://developer.ibm.com/site-content/themes/ibmdeveloper-carbon/js/navigation.js?ver=20151217' id='lucio-navigation-defer-js'></script>
+<script type='text/javascript' src='https://developer.ibm.com/site-content/plugins/page-links-to/dist/new-tab.js?ver=3.3.3' id='page-links-to-js'></script>
+<script type='text/javascript' src='https://developer.ibm.com/wp-includes/js/wp-embed.min.js?ver=5.6.5' id='wp-embed-js'></script>
+<script type='text/javascript' src='https://developer.ibm.com/site-content/themes/ibmdeveloper-carbon/js/qrcode.js?ver=20151217' id='qrcode-js-js'></script>
+<script>
+	var $searchTrigger = document.getElementById('header-search-module'),
+      $modalInstance = undefined,
+      $developerBurger = document.getElementById('developer-burger'),
+      $codeSideNav = document.getElementById('developerNavTriggersMobile'),
+      $codeSideNavCover = document.getElementById('code--side-nav-cover'),
+      $announcementClose = document.getElementById('announcement_close'),
+      $notificationDrawer = document.getElementById('notificationDrawer');
+
+      if($notificationDrawer != null){
+        $notificationDrawer.addEventListener('click', function(event) {
+          event.preventDefault();
+          $btn = ibmcode.getClosest(event.target, 'button');
+          if( $btn && $btn.classList.contains('bx--toast-notification__close-button') ){
+            ibmcode.getClosest($btn, 'div.bx--toast-notification').remove();
+          }
+        });
+      }
+
+
+  if($announcementClose != null){
+    $announcementClose.addEventListener('click', function(event) {
+      $elm = document.getElementById('code_announcement');
+      $elm.parentNode.removeChild($elm);
+      //document.body.classList.remove('no-fixed-menu');
+      ibmcode.setCookie('Code_Annouce_Closed','true',0);
+    });
+  }
+
+	if($searchTrigger != null){ //this can be way more efficient
+		$searchTrigger.addEventListener('click', function(event) {
+      $btn = ibmcode.getClosest(event.target, 'button');
+      if( $btn && $btn.classList.contains('GlobalSearch-module--search-button--search') ){
+        if($searchTrigger.querySelector('input[type="text"]').value.trim() != "" && !($searchTrigger.classList.contains('GlobalSearch-module--hidden')) ){
+          $searchTrigger.querySelector('form').submit();
+        }
+        $searchTrigger.classList.remove('GlobalSearch-module--hidden');
+        $searchTrigger.querySelector('input[type="text"]').focus();
+        $searchTrigger.querySelector('.GlobalSearch-module--search-button--close').classList.remove('GlobalSearch-module--hidden');
+      }else if( $btn && $btn.classList.contains('GlobalSearch-module--search-button--close') ){
+        $searchTrigger.classList.add('GlobalSearch-module--hidden');
+        $searchTrigger.querySelector('input[type="text"]').value= "";
+        $searchTrigger.querySelector('.GlobalSearch-module--search-button--close').classList.add('GlobalSearch-module--hidden');
+      }
+			// window.location.href = 'https://developer.ibm.com?s=';
+		});
+	}
+
+  if($developerBurger != null && $codeSideNavCover != null && $codeSideNav != null){
+		$developerBurger.addEventListener('click', function(event) {
+      //bx--side-nav--expanded
+      if( document.body.classList.contains('bx--side-nav--opened') ){
+        document.body.classList.remove('bx--side-nav--opened');
+      }else{
+        document.body.classList.add('bx--side-nav--opened');
+      }
+		});
+    $codeSideNavCover.addEventListener('click', function(event) {
+      //bx--side-nav--expanded
+      if( document.body.classList.contains('bx--side-nav--opened') ){
+        document.body.classList.remove('bx--side-nav--opened');
+      }else{
+        document.body.classList.add('bx--side-nav--opened');
+      }
+		});
+    $codeSideNav.addEventListener('click', function(event) {
+      //bx--side-nav--expanded
+      $letsFix = event.target.closest('.bx--side-nav__submenu');
+      if($letsFix){
+        if($letsFix.classList.contains('noclick')){
+          return;
+        }
+        if($letsFix.getAttribute("aria-expanded") === 'false'){
+          $letsFix.setAttribute("aria-expanded", "true");
+        }else{
+          $letsFix.setAttribute("aria-expanded", "false");
+        }
+      }
+		});
+	}
+
+
+	$codeLeftNav = document.getElementById('code--side-nav');
+	if($codeLeftNav != null){
+		$codeLeftNav.addEventListener('click', function(event) {
+      event.preventDefault();
+			var menuDropDown = event.target.closest('button.bx--side-nav__submenu');
+      if(menuDropDown){
+        if(menuDropDown.classList.contains('noclick')){
+          return;
+        }
+        if(menuDropDown.getAttribute("aria-expanded") === 'false'){
+          menuDropDown.setAttribute("aria-expanded", "true");
+        }else{
+          menuDropDown.setAttribute("aria-expanded", "false");
+        }
+      }
+		});
+	}
+  var openMenuItem = null;
+  var openSearch = null;
+	document.addEventListener('click', function (event) {
+    //are we clicking on a link leaving the site?
+    // if(event.target.tagName.toLowerCase() === 'a'){
+    //   var patt = new RegExp(/(?<!ibm|redhat)\.(?:com|biz|org)/g);
+    //   var res = patt.test(event.target.href);
+    //   if(res){
+    //     //we need to rewrite the url to the ibm redirect page
+    //     event.target.href = 'https://www.ibm.com/links?url=' + event.target.href;
+    //   }
+    // }
+
+    //we need a click event here to close the search if its open and there is a
+    if(openMenuItem != event.target){
+      if(openMenuItem != null){
+        openMenuItem.setAttribute("aria-expanded", "false");
+        openMenuItem = null;
+      }
+    }
+    //check to see if the last link we clicked on had a class of ".mylastaction"
+    if ( ibmcode.getClosest(event.target, 'a.mylastaction') ) {
+      var newTarg = ibmcode.getClosest(event.target, 'a.mylastaction');
+      var elmID = newTarg.getAttribute('id');
+      if(elmID != null){
+        localStorage.setItem("mylastaction", elmID);
+      }
+    }
+
+    //did we click on a state object that we want to keep track of?
+    if( ibmcode.getClosest(event.target, '[data-csm="true"]') ){
+      var csmTarg = ibmcode.getClosest(event.target, '[data-csm="true"]');
+      var csmTargID = csmTarg.getAttribute('id');
+      if(csmTargID != null){
+        var btoaUrl = btoa(window.location.pathname);
+        if(csmTarg.dataset.clicked == undefined){
+          csmTarg.dataset.clicked = 'true';
+
+          if(sessionStorage.getItem(btoaUrl) == null){
+            //create an array to store the clicked element
+            csmTargArray = [];
+          }else{
+            //get the session storage item for use
+            csmTargArray = sessionStorage.getItem(btoaUrl);
+            csmTargArray = csmTargArray.split(",");
+          }
+          //check to make sure the value is not in the array before adding
+          if(!csmTargArray.includes(csmTargID)){
+            csmTargArray.push(csmTargID);
+          }
+          //now store it
+          sessionStorage.setItem(btoaUrl, csmTargArray);
+        }else{
+          csmTargArray = sessionStorage.getItem(btoaUrl);
+          csmTargArray = csmTargArray.split(",");
+          //find the clicked element in the array and remove it
+          index = csmTargArray.indexOf(csmTargID);
+          if (index > -1) {
+            csmTargArray.splice(index, 1);
+            sessionStorage.setItem(btoaUrl, csmTargArray);
+          }
+          csmTarg.removeAttribute('data-clicked');
+        };
+        //if the array is empty, se should delete it
+        if(csmTargArray.length < 1){
+          sessionStorage.removeItem(btoaUrl);
+        }
+      }
+    }
+
+    // console.info(event);
+		if ( event.target.classList.contains('bx--snippet__icon') ) {
+			// Get the parent with the `.accordion` class
+			var parentBtn = ibmcode.getClosest(event.target, '.bx--snippet-button');
+			var codeBlock = parentBtn.previousElementSibling.querySelectorAll('code');
+			if(codeBlock[0]){
+				ibmcode.copyText(codeBlock[0]);
+			}
+		}
+    if ( ibmcode.getClosest(event.target, '.bx--header__menu-title') ) {
+      event.preventDefault();
+      var newTarg = ibmcode.getClosest(event.target, '.bx--header__menu-title');
+      if(newTarg === openMenuItem && openMenuItem != null){
+        openMenuItem.setAttribute("aria-expanded", "false");
+        openMenuItem = null;
+        return
+      }
+      openMenuItem = newTarg;
+      openMenuItem.setAttribute("aria-expanded", "true");
+    }
+
+    if ( ibmcode.getClosest(event.target, '.GlobalLogin-module--container') ) {
+      if(event.target.className === 'bx--header__menu-item'){
+        return;
+      }
+      event.preventDefault();
+      var newTarg = ibmcode.getClosest(event.target, '.GlobalLogin-module--container');
+      if(newTarg === openMenuItem && openMenuItem != null){
+        openMenuItem.setAttribute("aria-expanded", "false");
+        openMenuItem = null;
+        return;
+      }
+      openMenuItem = newTarg;
+      openMenuItem.setAttribute("aria-expanded", "true");
+    }
+
+
+
+    if(event.target.id === "challengeModal" || event.target.classList.contains('challenge--modal-close') || event.target.closest('.challenge--modal-close')){
+      toggleChallengeModal('',true);
+      return;
+    }
+    //we clicked on a challenge and we need to trigger the modal for taking it
+    if ( event.target.closest('.developer--card.ibmcode_challenges.loggedin') ) {
+      event.preventDefault();
+      $challengeURL = event.target.closest('.developer--card.ibmcode_challenges.loggedin').querySelector('.developer--card__block_link').href;
+      toggleChallengeModal($challengeURL);
+		}
+    //we clicked on a card that wants to display in a modal
+    if ( event.target.closest('.developer--card.modal') ) {
+      event.preventDefault();
+      console.info(event.target);
+      $challengeURL = event.target.closest('.developer--card.modal').querySelector('.developer--card__block_link').href;
+      toggleChallengeModal($challengeURL);
+		}
+	}, false);
+
+
+  function set_size($size){
+    document.querySelector('#challengeIframeWrap .challenge--modal-content').style.height = $size;
+  }
+
+  function toggleChallengeModal($challengeURL,$close,$completedChallenge){
+    if($close === true){
+      document.body.classList.remove("showing-modal");
+      $iFrame = document.getElementById('challengeIframe');
+      $iFrame.src = 'about:blank';
+    }else{
+      $challengeModal = document.getElementById('challengeModal');
+      $iFrame = document.getElementById('challengeIframe');
+      // $iFrameHeight = $iFrame.contentWindow.document.body.offsetHeight;
+      $iFrame.src = $challengeURL;
+      document.body.classList.add("showing-modal");
+    }
+    if(typeof($completedChallenge) === "string"){
+      var completedChallengeCards = document.querySelectorAll('a[href="/challenges/'+$completedChallenge+'/"]');
+      for (var i = 0; i < completedChallengeCards.length; i++) {
+        completedChallengeCards[i].parentNode.classList.add('completed');
+      }
+    }
+  }
+
+
+  var domReadyCallback = function(){
+    //get cookie for the last recordable action
+    // var lastAction = ibmcode.getCookie('mylastaction');
+    var lastAction = localStorage.getItem('mylastaction');
+    localStorage.removeItem('mylastaction');
+    // console.info(lastAction);
+    // ibmcode.eraseCookie('mylastaction'); //now clear the action
+    if(lastAction != null){
+      var targElm = document.getElementById(lastAction);
+      console.info(targElm);
+      targElm.classList.remove("mylastaction");
+      setTimeout(function(){ targElm.click(); }, 750);
+    }
+
+    //look at the session state elements for the current page and trigger them.
+    var btoaUrl = btoa(window.location.pathname);
+    var pageState = sessionStorage.getItem(btoaUrl);
+    if(pageState != null){
+      pageState = pageState.split(",");
+      pageState.forEach(function(entry) {
+        var targElm = document.getElementById(entry);
+        setTimeout(function(){
+          targElm.click();
+          targElm.dataset.clicked = 'true';
+        }, 750);
+      });
+      // var targElm = document.getElementById(pageState);
+      // setTimeout(function(){ targElm.click(); }, 750);
+    }
+
+
+    // Handler when the DOM is fully loaded
+    //handling the loazy load
+    var lazyloadCardImages,
+        lazyloadContentImages;
+
+    if ("IntersectionObserver" in window) {
+      //this will handle the card background images styled by css
+      lazyloadCardImages = document.querySelectorAll(".lazycards");
+      var imageCardObserver = new IntersectionObserver(function(entries, observer) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            var image = entry.target;
+            image.classList.remove("lazycards");
+            imageCardObserver.unobserve(image);
+          }
+        });
+      });
+      lazyloadCardImages.forEach(function(image) {
+        imageCardObserver.observe(image);
+      });
+      //this will handle the images used in the body of our content types
+      lazyloadContentImages = document.querySelectorAll(".lazycontent");
+      var imageContentObserver = new IntersectionObserver(function(entries, observer) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            var image = entry.target;
+            image.src = image.dataset.src;
+            image.classList.remove("lazycontent");
+            imageContentObserver.unobserve(image);
+          }
+        });
+      });
+
+      lazyloadContentImages.forEach(function(image) {
+        imageContentObserver.observe(image);
+      });
+    }
+
+    //function that runs to set the same height of card elements
+
+    setTimeout(function() {
+      $sameHeightWidgets = document.querySelectorAll('[data-widget="setsameheight"]');
+      ibmcode.widgetSetSameHeight($sameHeightWidgets,true);
+    }, 250);
+    var resizeTimer;
+    ibmcode.addEvent(window,'resize',function(){
+      clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+          ibmcode.widgetSetSameHeight($sameHeightWidgets,true);
+        }, 250);
+    });
+
+
+    //this javascript needs to get added to the page only when a user is logged in and auth is true
+
+  };
+
+  if ( document.readyState === "complete" || (document.readyState !== "loading" && !document.documentElement.doScroll) ) {
+    domReadyCallback();
+  } else {
+    document.addEventListener("DOMContentLoaded", domReadyCallback);
+  }
+
+
+  /* adding functions to handle sending in favoriting */
+  // ibmcode.postAjax = function(url, data, callback)
+
+</script>
+
+</body>
+</html>
