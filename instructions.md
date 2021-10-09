@@ -24,4 +24,6 @@ This will generate protobuf code from the .proto file into `./modules/api_person
 
 api image
 
+oyelowo/udaconnect-app
+oyelowo/udaconnect-api
 oyelowo/udaconnect-api-person

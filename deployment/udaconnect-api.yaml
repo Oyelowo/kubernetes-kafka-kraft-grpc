@@ -21,7 +21,7 @@ metadata:
     service: udaconnect-api
   name: udaconnect-api
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       service: udaconnect-api

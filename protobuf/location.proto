@@ -8,12 +8,34 @@ message Location {
     string creation_time = 5;
 }
 
+message CreateLocationRequest {
+    string person_id = 1;
+    string longitude = 2;
+    string latitude = 3;
+    string creation_time = 4;
+}
+
+message GetLocationRequest {
+    int id = 1;
+}
+
+
+
+//    new_location.person_id = location["person_id"]
+//         new_location.creation_time = location["creation_time"]
+//         new_location.coordinate = ST_Point(location["latitude"], location["longitude"])
+service Location {
+    rpc CreateLocation (CreateLocationRequest) returns (Location);
+    rpc GetLocation (GetLocationRequest) returns (Location);
+
+}
+
 message Connection {
     api.person.Person person = 1;
     Location location = 1;
 }
 
-message ConnectionRequest {
+message GetConnectionRequest {
     int32 person_id = 1;
     string start_date = 2; 
     string end_date = 3;: 
@@ -21,5 +43,5 @@ message ConnectionRequest {
 }
 
 service Connection {
-    rpc GetConnection (ConnectionRequest) returns (Connection);
+    rpc GetConnection (GetConnectionRequest) returns (Connection);
 }

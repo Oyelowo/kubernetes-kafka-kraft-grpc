@@ -1,24 +1,20 @@
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List
-
-from app import db
+from google.protobuf.json_format import MessageToJson, MessageToDict
 from app.udaconnect.schemas import ConnectionSchema, LocationSchema, PersonSchema
-from geoalchemy2.functions import ST_AsText, ST_Point
-from sqlalchemy.sql import text
 
-from modules.api.app.protobuf.person_pb2 import Person
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger("udaconnect-api")
 
 
-import grpc
+# import grpc
 
-from app.protobuf import person_pb2, person_pb2_grpc
+from protobuf import person_pb2
 
-channel = grpc.insecure_channel("localhost:50051")
-stub = person_pb2_grpc.PersonServiceStub(channel)
+# channel = grpc.insecure_channel("localhost:50051", options=(('grpc.enable_http_proxy', 0),))
+# stub = person_pb2_grpc.PersonServiceStub(channel)
 
 
 class ConnectionService:
@@ -122,7 +118,7 @@ class LocationService:
 
 class PersonService:
     @staticmethod
-    def create(person) -> Person:
+    def create(stub, person):
         person = person_pb2.CreatePersonRequest(
             first_name = person["first_name"],
             last_name = person["last_name"],
@@ -131,19 +127,19 @@ class PersonService:
 
         new_person = stub.CreatePerson(person) 
         print("resppp", new_person)
+        return MessageToDict(new_person, preserving_proto_field_name=True)
 
-
-        return new_person
 
     @staticmethod
-    def retrieve(person_id: int) -> Person:
+    def retrieve(stub, person_id: int):
         person = stub.GetPerson(person_pb2.GetPersonRequest(id=person_id))
         print("resppp3\n", person)
-        return person
+        return MessageToDict(person, preserving_proto_field_name=True)
 
     @staticmethod
-    def retrieve_all() -> List[Person]:
-        all_persons = stub.GetAllPersons(person_pb2.Empty())
-        print("resppp2", all_persons)
-        return all_persons
+    def retrieve_all(stub):
+        response = stub.GetAllPersons(person_pb2.Empty())
+        print("resppp2", response)
+        # return  MessageToJson(response.persons[0], preserving_proto_field_name=True)
+        return  [MessageToDict(m, preserving_proto_field_name=True) for m in response.persons]
 
