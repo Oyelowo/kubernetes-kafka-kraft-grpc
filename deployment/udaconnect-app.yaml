@@ -21,17 +21,22 @@ metadata:
     service: udaconnect-app
   name: udaconnect-app
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       service: udaconnect-app
+    strategy:
+  # rollingUpdate:
+  #   maxSurge: 25%
+  #   maxUnavailable: 25%
+  # type: RollingUpdate
   template:
     metadata:
       labels:
         service: udaconnect-app
     spec:
       containers:
-      - image: oyelowo/person:latest
+      - image: oyelowo/udaconnect-frontend:latest
         name: udaconnect-app
         imagePullPolicy: Always
         resources:

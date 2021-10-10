@@ -35,6 +35,8 @@ spec:
         name: udaconnect-api
         imagePullPolicy: Always
         env:
+        - name: API_PERSON_HOST
+          value: udaconnect-api-person
         - name: DB_USERNAME
           valueFrom:
             configMapKeyRef:
