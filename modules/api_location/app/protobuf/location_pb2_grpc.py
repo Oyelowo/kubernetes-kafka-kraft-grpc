@@ -6,10 +6,7 @@ from protobuf import location_pb2 as protobuf_dot_location__pb2
 
 
 class LocationServiceStub(object):
-    """new_location.person_id = location["person_id"]
-    new_location.creation_time = location["creation_time"]
-    new_location.coordinate = ST_Point(location["latitude"], location["longitude"])
-    """
+    """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
         """Constructor.
@@ -30,10 +27,7 @@ class LocationServiceStub(object):
 
 
 class LocationServiceServicer(object):
-    """new_location.person_id = location["person_id"]
-    new_location.creation_time = location["creation_time"]
-    new_location.coordinate = ST_Point(location["latitude"], location["longitude"])
-    """
+    """Missing associated documentation comment in .proto file."""
 
     def CreateLocation(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -68,10 +62,7 @@ def add_LocationServiceServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class LocationService(object):
-    """new_location.person_id = location["person_id"]
-    new_location.creation_time = location["creation_time"]
-    new_location.coordinate = ST_Point(location["latitude"], location["longitude"])
-    """
+    """Missing associated documentation comment in .proto file."""
 
     @staticmethod
     def CreateLocation(request,
@@ -120,7 +111,7 @@ class ConnectionServiceStub(object):
         self.GetConnection = channel.unary_unary(
                 '/ConnectionService/GetConnection',
                 request_serializer=protobuf_dot_location__pb2.GetConnectionRequest.SerializeToString,
-                response_deserializer=protobuf_dot_location__pb2.Connection.FromString,
+                response_deserializer=protobuf_dot_location__pb2.ConnectionResponse.FromString,
                 )
 
 
@@ -139,7 +130,7 @@ def add_ConnectionServiceServicer_to_server(servicer, server):
             'GetConnection': grpc.unary_unary_rpc_method_handler(
                     servicer.GetConnection,
                     request_deserializer=protobuf_dot_location__pb2.GetConnectionRequest.FromString,
-                    response_serializer=protobuf_dot_location__pb2.Connection.SerializeToString,
+                    response_serializer=protobuf_dot_location__pb2.ConnectionResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -164,6 +155,6 @@ class ConnectionService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/ConnectionService/GetConnection',
             protobuf_dot_location__pb2.GetConnectionRequest.SerializeToString,
-            protobuf_dot_location__pb2.Connection.FromString,
+            protobuf_dot_location__pb2.ConnectionResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

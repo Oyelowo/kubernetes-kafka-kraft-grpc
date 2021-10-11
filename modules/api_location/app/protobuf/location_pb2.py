@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x17protobuf/location.proto\x1a\x15protobuf/person.proto\"e\n\x08Location\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x11\n\tperson_id\x18\x02 \x01(\t\x12\x11\n\tlongitude\x18\x03 \x01(\t\x12\x10\n\x08latitude\x18\x04 \x01(\t\x12\x15\n\rcreation_time\x18\x05 \x01(\t\"f\n\x15\x43reateLocationRequest\x12\x11\n\tperson_id\x18\x01 \x01(\t\x12\x11\n\tlongitude\x18\x02 \x01(\t\x12\x10\n\x08latitude\x18\x03 \x01(\t\x12\x15\n\rcreation_time\x18\x04 \x01(\t\" \n\x12GetLocationRequest\x12\n\n\x02id\x18\x01 \x01(\x05\"M\n\nConnection\x12\"\n\x06person\x18\x01 \x01(\x0b\x32\x12.api.person.Person\x12\x1b\n\x08location\x18\x02 \x01(\x0b\x32\t.Location\"_\n\x14GetConnectionRequest\x12\x11\n\tperson_id\x18\x01 \x01(\x05\x12\x12\n\nstart_date\x18\x02 \x01(\t\x12\x10\n\x08\x65nd_date\x18\x03 \x01(\t\x12\x0e\n\x06meters\x18\x04 \x01(\x02\x32u\n\x0fLocationService\x12\x33\n\x0e\x43reateLocation\x12\x16.CreateLocationRequest\x1a\t.Location\x12-\n\x0bGetLocation\x12\x13.GetLocationRequest\x1a\t.Location2H\n\x11\x43onnectionService\x12\x33\n\rGetConnection\x12\x15.GetConnectionRequest\x1a\x0b.Connectionb\x06proto3'
+  serialized_pb=b'\n\x17protobuf/location.proto\x1a\x15protobuf/person.proto\"e\n\x08Location\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x11\n\tperson_id\x18\x02 \x01(\t\x12\x11\n\tlongitude\x18\x03 \x01(\t\x12\x10\n\x08latitude\x18\x04 \x01(\t\x12\x15\n\rcreation_time\x18\x05 \x01(\t\"f\n\x15\x43reateLocationRequest\x12\x11\n\tperson_id\x18\x01 \x01(\t\x12\x11\n\tlongitude\x18\x02 \x01(\t\x12\x10\n\x08latitude\x18\x03 \x01(\t\x12\x15\n\rcreation_time\x18\x04 \x01(\t\" \n\x12GetLocationRequest\x12\n\n\x02id\x18\x01 \x01(\x05\"M\n\nConnection\x12\"\n\x06person\x18\x01 \x01(\x0b\x32\x12.api.person.Person\x12\x1b\n\x08location\x18\x02 \x01(\x0b\x32\t.Location\"6\n\x12\x43onnectionResponse\x12 \n\x0b\x63onnections\x18\x01 \x03(\x0b\x32\x0b.Connection\"_\n\x14GetConnectionRequest\x12\x11\n\tperson_id\x18\x01 \x01(\x05\x12\x12\n\nstart_date\x18\x02 \x01(\t\x12\x10\n\x08\x65nd_date\x18\x03 \x01(\t\x12\x0e\n\x06meters\x18\x04 \x01(\x02\x32u\n\x0fLocationService\x12\x33\n\x0e\x43reateLocation\x12\x16.CreateLocationRequest\x1a\t.Location\x12-\n\x0bGetLocation\x12\x13.GetLocationRequest\x1a\t.Location2P\n\x11\x43onnectionService\x12;\n\rGetConnection\x12\x15.GetConnectionRequest\x1a\x13.ConnectionResponseb\x06proto3'
   ,
   dependencies=[protobuf_dot_person__pb2.DESCRIPTOR,])
 
@@ -211,6 +211,38 @@ _CONNECTION = _descriptor.Descriptor(
 )
 
 
+_CONNECTIONRESPONSE = _descriptor.Descriptor(
+  name='ConnectionResponse',
+  full_name='ConnectionResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='connections', full_name='ConnectionResponse.connections', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=370,
+  serialized_end=424,
+)
+
+
 _GETCONNECTIONREQUEST = _descriptor.Descriptor(
   name='GetConnectionRequest',
   full_name='GetConnectionRequest',
@@ -259,16 +291,18 @@ _GETCONNECTIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=370,
-  serialized_end=465,
+  serialized_start=426,
+  serialized_end=521,
 )
 
 _CONNECTION.fields_by_name['person'].message_type = protobuf_dot_person__pb2._PERSON
 _CONNECTION.fields_by_name['location'].message_type = _LOCATION
+_CONNECTIONRESPONSE.fields_by_name['connections'].message_type = _CONNECTION
 DESCRIPTOR.message_types_by_name['Location'] = _LOCATION
 DESCRIPTOR.message_types_by_name['CreateLocationRequest'] = _CREATELOCATIONREQUEST
 DESCRIPTOR.message_types_by_name['GetLocationRequest'] = _GETLOCATIONREQUEST
 DESCRIPTOR.message_types_by_name['Connection'] = _CONNECTION
+DESCRIPTOR.message_types_by_name['ConnectionResponse'] = _CONNECTIONRESPONSE
 DESCRIPTOR.message_types_by_name['GetConnectionRequest'] = _GETCONNECTIONREQUEST
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -300,6 +334,13 @@ Connection = _reflection.GeneratedProtocolMessageType('Connection', (_message.Me
   })
 _sym_db.RegisterMessage(Connection)
 
+ConnectionResponse = _reflection.GeneratedProtocolMessageType('ConnectionResponse', (_message.Message,), {
+  'DESCRIPTOR' : _CONNECTIONRESPONSE,
+  '__module__' : 'protobuf.location_pb2'
+  # @@protoc_insertion_point(class_scope:ConnectionResponse)
+  })
+_sym_db.RegisterMessage(ConnectionResponse)
+
 GetConnectionRequest = _reflection.GeneratedProtocolMessageType('GetConnectionRequest', (_message.Message,), {
   'DESCRIPTOR' : _GETCONNECTIONREQUEST,
   '__module__' : 'protobuf.location_pb2'
@@ -316,8 +357,8 @@ _LOCATIONSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=467,
-  serialized_end=584,
+  serialized_start=523,
+  serialized_end=640,
   methods=[
   _descriptor.MethodDescriptor(
     name='CreateLocation',
@@ -352,8 +393,8 @@ _CONNECTIONSERVICE = _descriptor.ServiceDescriptor(
   index=1,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=586,
-  serialized_end=658,
+  serialized_start=642,
+  serialized_end=722,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetConnection',
@@ -361,7 +402,7 @@ _CONNECTIONSERVICE = _descriptor.ServiceDescriptor(
     index=0,
     containing_service=None,
     input_type=_GETCONNECTIONREQUEST,
-    output_type=_CONNECTION,
+    output_type=_CONNECTIONRESPONSE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

@@ -1,5 +1,8 @@
 import os
 from typing import List, Type
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+
 
 DB_USERNAME = os.environ["DB_USERNAME"]
 DB_PASSWORD = os.environ["DB_PASSWORD"]
@@ -56,3 +59,10 @@ EXPORT_CONFIGS: List[Type[BaseConfig]] = [
     ProductionConfig,
 ]
 config_by_name = {cfg.CONFIG_NAME: cfg for cfg in EXPORT_CONFIGS}
+
+
+app = Flask(__name__)
+db = SQLAlchemy(app)
+
+def create_app(env=None):
+    app.config.from_object(config_by_name[env or "test"])

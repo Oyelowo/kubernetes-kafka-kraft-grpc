@@ -2,10 +2,12 @@
 
 Resources for a tutorial that covers running KRaft mode Kafka v3.0.0 on a Minikube-based Kubernetes cluster.
 
-1. Get into one of the kafka pods
+1. Get into one of the kafka pods in namespace - kafka-kraft
+`kubectl exec -it kafka-0 -n kafka-kraft -- /bin/bash`
+if in default namespace, below should suffice
 `kubectl exec -it kafka-0 -- /bin/bash`
 
-2. Create 
+1. Create 
 `kafka-topics.sh --create --topic test --partitions 3 --replication-factor 3 --bootstrap-server localhost:9092`
 
 3. Check the configuration 
@@ -14,8 +16,8 @@ Resources for a tutorial that covers running KRaft mode Kafka v3.0.0 on a Miniku
 4. Test inside the pods
 ```
 kafka-console-producer.sh \
-  --topic orders \
-  --bootstrap-server broker:9092 \
+  --topic test \
+  --bootstrap-server localhost:9092 \
   --property parse.key=true \  // optional
   --property key.separator=":"  // optional
 ```
@@ -24,8 +26,8 @@ In another terminal
 Console consumer:
 ```
 kafka-console-consumer.sh \
-  --topic orders \
-  --bootstrap-server broker:9092 \
+  --topic test \
+  --bootstrap-server localhost:9092 \
   --from-beginning \
   --property print.key=true \
   --property key.separator="-"

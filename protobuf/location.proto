@@ -21,10 +21,6 @@ message GetLocationRequest {
 }
 
 
-
-//    new_location.person_id = location["person_id"]
-//         new_location.creation_time = location["creation_time"]
-//         new_location.coordinate = ST_Point(location["latitude"], location["longitude"])
 service LocationService {
     rpc CreateLocation (CreateLocationRequest) returns (Location);
     rpc GetLocation (GetLocationRequest) returns (Location);
@@ -36,6 +32,10 @@ message Connection {
     Location location = 2;
 }
 
+message ConnectionResponse {
+    repeated Connection connections = 1;
+}
+
 message GetConnectionRequest {
     int32 person_id = 1;
     string start_date = 2; 
@@ -44,5 +44,5 @@ message GetConnectionRequest {
 }
 
 service ConnectionService {
-    rpc GetConnection (GetConnectionRequest) returns (Connection);
+    rpc GetConnection (GetConnectionRequest) returns (ConnectionResponse);
 }
