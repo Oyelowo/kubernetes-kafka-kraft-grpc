@@ -73,7 +73,7 @@ services:
       #- FLASK_ENV=development
       #- FLASK_APP=app.py
     ports:
-      - "50052:50052"
+      - "50052:50051"
 
   postgres_location:
     image: postgis/postgis:12-2.5-alpine
@@ -92,7 +92,7 @@ services:
       # DB_PASSWORD: wowimsosecure%
     volumes:
       - /var/lib/postgres
-      - dbscripts:/docker-entrypoint-initdb.d
+      - dbscripts/:/docker-entrypoint-initdb.d
 
   client:
     tty: true

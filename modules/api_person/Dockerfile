@@ -25,4 +25,4 @@ COPY . .
 # CMD ["flask", "run", "--host", "0.0.0.0"]
 # CMD ["python3", "./app"]
 # CMD ["python3", "./app/app.py"]
-ENTRYPOINT ["python3", "./app/server.py"]
+CMD ["python3", "./app/server.py"]

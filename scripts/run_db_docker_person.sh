@@ -2,7 +2,7 @@
 
 # Set database configurations
 export CT_DB_USERNAME=ct_admin
-export CT_DB_NAME=geoconnections
+export CT_DB_NAME=person
 
 
 
