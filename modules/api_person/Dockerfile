@@ -11,18 +11,7 @@ RUN pip install -r requirements.txt
 # RUN python -m grpc_tools.protoc -I ../protobufs --python_out=. \
 #     --grpc_python_out=. ../protobufs/recommendations.proto
 
-ARG PASS="d293aW1zb3NlY3VyZQ==" | base64 -d
-RUN echo $PASS
-ENV DB_USERNAME=ct_admin
-ENV DB_PASSWORD=$PASS
-ENV DB_NAME=geoconnections
-ENV DB_HOST=postgres
-ENV DB_PORT=5432
-
 EXPOSE 50051
 
 COPY . .
-# CMD ["flask", "run", "--host", "0.0.0.0"]
-# CMD ["python3", "./app"]
-# CMD ["python3", "./app/app.py"]
 CMD ["python3", "./app/server.py"]

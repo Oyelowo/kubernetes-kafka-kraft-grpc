@@ -6,8 +6,8 @@ export CT_DB_NAME=person
 
 
 
-cat ../db/2020-08-15_init-db.sql | docker  exec -i $1 bash -c "psql -U $CT_DB_USERNAME -d $CT_DB_NAME"
+cat ./db/2020-08-15_init-db.sql | docker  exec -i $1 bash -c "psql -U $CT_DB_USERNAME -d $CT_DB_NAME"
 
-cat ../db/udaconnect_public_person.sql | docker  exec -i $1 bash -c "psql -U $CT_DB_USERNAME -d $CT_DB_NAME"
+cat ./db/udaconnect_public_person.sql | docker  exec -i $1 bash -c "psql -U $CT_DB_USERNAME -d $CT_DB_NAME"
 
 # cat ../db/udaconnect_public_location.sql | docker  exec -i $1 bash -c "psql -U $CT_DB_USERNAME -d $CT_DB_NAME"
