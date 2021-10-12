@@ -81,7 +81,8 @@ class ConnectionServicer(connection_pb2_grpc.ConnectionServiceServicer):
         #print("SHRGEFSDA", [location_pb2.Location(**c.location.jsonify()) for c in connections_db])
         # print("RRRRRRRRR", [person_pb2.Person(**c.person) for c in connections_db])
         print("RRRRRRRRR", [connection_pb2.Connection(person=person_pb2.Person(**c.person), location=location_pb2.Location(**c.location.jsonify())) for c in connections_db])
-        connection_response.connections.extend([connection_pb2.Connection(person=person_pb2.Person(**c.person), location=location_pb2.Location(**c.location.jsonify())) for c in connections_db])
+        #connection_response.connections.extend([connection_pb2.Connection(person=person_pb2.Person(**c.person), location=location_pb2.Location(**c.location.jsonify())) for c in connections_db])
+        connection_response.connections.extend([connection_pb2.Connection(person=c.person, location=c.location.jsonify()) for c in connections_db])
 
         return connection_response
 
