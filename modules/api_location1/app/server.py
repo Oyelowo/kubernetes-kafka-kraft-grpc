@@ -118,9 +118,9 @@ class PersonServicer(person_pb2_grpc.PersonServiceServicer):
 
         request_value = {
                  "id" : request.id,
-                "first_name" : "request.first_name",
-                "last_name" : "request.last_name",
-                "company_name" : "request.company_name",
+                "first_name" : request.first_name,
+                "last_name" : request.last_name,
+                "company_name" : request.company_name,
         }
         print(request_value)
         person = person_pb2.Person(       

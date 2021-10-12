@@ -35,13 +35,13 @@ services:
       #- FLASK_ENV=development
       #- FLASK_APP=app.py
     ports:
-      - "50051:50051"
+      - "50052:50051"
 
   postgres_person:
     image: postgis/postgis:12-2.5-alpine
     container_name: postgres-person
     ports:
-      - "5432:5432"
+      - "5433:5432"
       # - 5432:5432/tcp
     environment:
       - POSTGRES_USER=ct_admin
@@ -66,27 +66,27 @@ services:
     #   - microservices
     environment:
       - DB_USERNAME=ct_admin
-      - DB_NAME=geoconnections
+      - DB_NAME=location
       - DB_HOST=postgres_location
-      - DB_PORT=5433
+      - DB_PORT=5434
       - DB_PASSWORD=wowimsosecure%
       #- FLASK_ENV=development
       #- FLASK_APP=app.py
     ports:
-      - "50052:50051"
+      - "50051:50051"
 
   postgres_location:
     image: postgis/postgis:12-2.5-alpine
     container_name: postgres-location
     ports:
-      - "5433:5432"
+      - "5434:5432"
       # - 5432:5432/tcp
     environment:
       - POSTGRES_USER=ct_admin
       - POSTGRES_PASSWORD=wowimsosecure%
-      - POSTGRES_DB=geoconnections
+      - POSTGRES_DB=location
       # DB_USERNAME: "ct_admin"
-      # DB_NAME: "geoconnections"
+      # DB_NAME: "location"
       # DB_HOST: "postgres"
       # DB_PORT: "5433"
       # DB_PASSWORD: wowimsosecure%

@@ -8,7 +8,7 @@ api_person_host = os.getenv("API_PERSON_HOST", "localhost")
 
 # port 30002 has been mapped in the to from guest to host in the VM with vagrant
 # Host: 192.168.50.4 or localhost
-channel = grpc.insecure_channel(f"{api_person_host}:50051", options=(('grpc.enable_http_proxy', 0),))
+channel = grpc.insecure_channel(f"{api_person_host}:50052", options=(('grpc.enable_http_proxy', 0),))
 #channel = grpc.insecure_channel(f"{api_person_host}:30002", options=(('grpc.enable_http_proxy', 0),))
 stub = person_pb2_grpc.PersonServiceStub(channel)
 

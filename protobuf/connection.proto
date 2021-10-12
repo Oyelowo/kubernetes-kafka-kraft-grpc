@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+import "protobuf/person.proto";
+import "protobuf/location.proto";
+
+message Connection {
+    api.person.Person person = 1;
+    api.location.Location location = 2;
+}
+
+message ConnectionResponse {
+    repeated Connection connections = 1;
+}
+
+message GetConnectionRequest {
+    int32 person_id = 1;
+    string start_date = 2; 
+    string end_date = 3;
+    float meters = 4;
+}
+
+service ConnectionService {
+    rpc GetConnection (GetConnectionRequest) returns (ConnectionResponse);
+}
