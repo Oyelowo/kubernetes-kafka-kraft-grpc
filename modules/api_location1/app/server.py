@@ -108,7 +108,6 @@ import grpc
 from typing import List
 
 from config import  create_app
-from models import Person
 from services import  PersonService
 from protobuf import person_pb2, person_pb2_grpc
 

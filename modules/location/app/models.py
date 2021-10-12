@@ -1,3 +1,35 @@
+# from __future__ import annotations
+
+# from config import db  # noqa
+# import uuid
+
+# from sqlalchemy import Column, Integer, String, create_engine
+
+# #engine = create_engine(‘mssql+pyodbc://server_name/database_name?driver=SQL Server?Trusted_Connection=yes’)
+
+# from sqlalchemy.dialects import postgresql
+
+# UUID = postgresql.UUID(as_uuid=True)
+
+# class Person(db.Model):
+#     __tablename__ = "person"
+
+#     id = Column(Integer, primary_key=True, autoincrement=True)
+#     # uid = Column(UUID, primary_key=True, default=uuid.uuid4, nullable=False)
+#     first_name = Column(String, nullable=False)
+#     last_name = Column(String, nullable=False)
+#     company_name = Column(String, nullable=False)
+    
+#     def jsonify(self):
+#         return {
+#             "id": self.id,
+#             "first_name": self.first_name,
+#             "last_name": self.last_name,
+#             "company_name": self.company_name,
+#         }
+
+
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -50,12 +82,21 @@ class Location(db.Model):
     def latitude(self) -> str:
         coord_text = self.wkt_shape
         return coord_text[coord_text.find("(") + 1 : coord_text.find(" ")]
+    
+    def jsonify(self):
+        return {
+            "id": self.id,
+            "person_id": self.person_id,
+            "longitude": self.longitude,
+            "latitude": self.latitude,
+            "creation_time": str(self.creation_time),
+        }
 
 
 @dataclass
 class Connection:
-    location: Location
     person: Any
+    location: Location
     # person: Person
 
     def jsonify(self):

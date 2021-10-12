@@ -40,6 +40,7 @@ class PersonServicer(person_pb2_grpc.PersonServiceServicer):
         persons_db: List[Person] = PersonService.retrieve_all()
         persons = person_pb2.Persons()
         persons.persons.extend([person_pb2.Person(**p.jsonify()) for p in persons_db])
+        print("Get all persons,", persons)
         
         return persons
 

@@ -2,7 +2,7 @@
 import grpc
 import os
 from protobuf import person_pb2, person_pb2_grpc
-
+from google.protobuf.json_format import MessageToJson, MessageToDict
 #channel = grpc.insecure_channel("localhost:50051")
 api_person_host = os.getenv("API_PERSON_HOST", "localhost")
 
@@ -26,7 +26,8 @@ stub = person_pb2_grpc.PersonServiceStub(channel)
 
 response3 = stub.GetPerson(person_pb2.GetPersonRequest(id=1))
 
-print("resppp3\n", response3)
+print("resppp3ll\n", response3)
 
-response2 = stub.GetAllPersons(person_pb2.Empty())
-print("resppp2", response2)
+response = stub.GetAllPersons(person_pb2.Empty())
+print("resppp2KK", response)
+#print("resppp2", [MessageToDict(m, preserving_proto_field_name=True) for m in response.persons])

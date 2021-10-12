@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x17protobuf/location.proto\x12\x0c\x61pi.location\"e\n\x08Location\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x11\n\tperson_id\x18\x02 \x01(\t\x12\x11\n\tlongitude\x18\x03 \x01(\t\x12\x10\n\x08latitude\x18\x04 \x01(\t\x12\x15\n\rcreation_time\x18\x05 \x01(\t\"f\n\x15\x43reateLocationRequest\x12\x11\n\tperson_id\x18\x01 \x01(\t\x12\x11\n\tlongitude\x18\x02 \x01(\t\x12\x10\n\x08latitude\x18\x03 \x01(\t\x12\x15\n\rcreation_time\x18\x04 \x01(\t\" \n\x12GetLocationRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x32\xa9\x01\n\x0fLocationService\x12M\n\x0e\x43reateLocation\x12#.api.location.CreateLocationRequest\x1a\x16.api.location.Location\x12G\n\x0bGetLocation\x12 .api.location.GetLocationRequest\x1a\x16.api.location.Locationb\x06proto3'
+  serialized_pb=b'\n\x17protobuf/location.proto\x12\x0c\x61pi.location\"e\n\x08Location\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x11\n\tperson_id\x18\x02 \x01(\x05\x12\x11\n\tlongitude\x18\x03 \x01(\t\x12\x10\n\x08latitude\x18\x04 \x01(\t\x12\x15\n\rcreation_time\x18\x05 \x01(\t\"f\n\x15\x43reateLocationRequest\x12\x11\n\tperson_id\x18\x01 \x01(\x05\x12\x11\n\tlongitude\x18\x02 \x01(\t\x12\x10\n\x08latitude\x18\x03 \x01(\t\x12\x15\n\rcreation_time\x18\x04 \x01(\t\" \n\x12GetLocationRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x32\xa9\x01\n\x0fLocationService\x12M\n\x0e\x43reateLocation\x12#.api.location.CreateLocationRequest\x1a\x16.api.location.Location\x12G\n\x0bGetLocation\x12 .api.location.GetLocationRequest\x1a\x16.api.location.Locationb\x06proto3'
 )
 
 
@@ -42,8 +42,8 @@ _LOCATION = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='person_id', full_name='api.location.Location.person_id', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -95,8 +95,8 @@ _CREATELOCATIONREQUEST = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='person_id', full_name='api.location.CreateLocationRequest.person_id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),

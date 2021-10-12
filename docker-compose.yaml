@@ -1,26 +1,26 @@
 version: "3"
 
 services:
-  api:
-    build:
-      context: ./modules/api
-      dockerfile: Dockerfile
-    #command: ["flask", "run", "--host=0.0.0.0"]
-    image: api
-    # networks:
-    #   - microservices
-    volumes:
-      - ./api:/backend
-    environment:
-      - API_PERSON_HOST=api_person
-      - FLASK_ENV=development
-      - FLASK_APP=app.py
-    ports:
-      - "30001:5000"
+  # api:
+  #   build:
+  #     context: ./modules/api
+  #     dockerfile: Dockerfile
+  #   #command: ["flask", "run", "--host=0.0.0.0"]
+  #   image: api
+  #   # networks:
+  #   #   - microservices
+  #   volumes:
+  #     - ./api:/backend
+  #   environment:
+  #     - API_PERSON_HOST=api_person
+  #     - FLASK_ENV=development
+  #     - FLASK_APP=app.py
+  #   ports:
+  #     - "30001:5000"
 
   api_person:
     build:
-      context: ./modules/api_person/
+      context: ./modules/person/
       dockerfile: Dockerfile
     #command: ["python3", "./app/server.py"]
     image: api_person
@@ -58,7 +58,7 @@ services:
 
   api_location:
     build:
-      context: ./modules/api_location/
+      context: ./modules/location/
       dockerfile: Dockerfile
     #command: ["python3", "./app/server.py"]
     image: api_location
@@ -68,12 +68,12 @@ services:
       - DB_USERNAME=ct_admin
       - DB_NAME=location
       - DB_HOST=postgres_location
-      - DB_PORT=5434
+      - DB_PORT=5432
       - DB_PASSWORD=wowimsosecure%
       #- FLASK_ENV=development
       #- FLASK_APP=app.py
     ports:
-      - "50051:50051"
+      - "50053:50051"
 
   postgres_location:
     image: postgis/postgis:12-2.5-alpine
@@ -94,38 +94,38 @@ services:
       - /var/lib/postgres
       - dbscripts/:/docker-entrypoint-initdb.d
 
-  client:
-    tty: true
-    build:
-      context: ./modules/frontend
-      dockerfile: Dockerfile
-    command: ["npm", "start"]
-    # networks:
-    #   - microservices
-    volumes:
-      - ./client:/frontend
-      - dbscripts:/frontend/node_modules
-    environment:
-      - NODE_ENV=development
-    ports:
-      - '3000:3000'
-    depends_on:
-      - api
+  # client:
+  #   tty: true
+  #   build:
+  #     context: ./modules/frontend
+  #     dockerfile: Dockerfile
+  #   command: ["npm", "start"]
+  #   # networks:
+  #   #   - microservices
+  #   volumes:
+  #     - ./client:/frontend
+  #     - dbscripts:/frontend/node_modules
+  #   environment:
+  #     - NODE_ENV=development
+  #   ports:
+  #     - '3000:3000'
+  #   depends_on:
+  #     - api
 
-  kafka-kraft:
-    build:
-      context: ./kraft-mode-kafka-on-kubernetes-main/docker/
-      dockerfile: Dockerfile
-    environment:
-      - REPLICAS='3'
-      - SERVICE=kafka-svc
-      - NAMESPACE=kafka-kraft
-      - SHARE_DIR=/mnt/kafka
-      #- FLASK_ENV=development
-      #- FLASK_APP=app.py
-    ports:
-      - "9092:9092"
-    volumes:
+  # kafka-kraft:
+  #   build:
+  #     context: ./kraft-mode-kafka-on-kubernetes-main/docker/
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     - REPLICAS='3'
+  #     - SERVICE=kafka-svc
+  #     - NAMESPACE=kafka-kraft
+  #     - SHARE_DIR=/mnt/kafka
+  #     #- FLASK_ENV=development
+  #     #- FLASK_APP=app.py
+  #   ports:
+  #     - "9092:9092"
+  #   volumes:
       - dbscripts:/mnt/kafka
 
 # networks:
