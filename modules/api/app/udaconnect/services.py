@@ -37,14 +37,10 @@ class ConnectionService:
 
 
         connection_request = connection_pb2.GetConnectionRequest(
-            # person_id = int(person_id),
-            # start_date = start_date.isoformat(timespec='seconds'), 
-            # end_date = end_date.isoformat(timespec='seconds'),
-            # meters = meters,
-                person_id =  int(person_id),
-                start_date = "2020-01-01", 
-                end_date = "2020-12-30",
-                meters = 6.0,
+            person_id = int(person_id),
+            start_date = start_date, 
+            end_date = end_date,
+            meters = meters,
             )
         response = stub.GetConnection(connection_request)
 

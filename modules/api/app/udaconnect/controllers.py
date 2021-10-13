@@ -90,18 +90,18 @@ class PersonResource(Resource):
 class ConnectionDataResource(Resource):
     # @responds(schema=ConnectionSchema, many=True)
     def get(self, person_id) -> ConnectionSchema:
-        start_date: datetime = datetime.strptime(
-            request.args["start_date"], DATE_FORMAT
-        )
-        end_date: datetime = datetime.strptime(request.args["end_date"], DATE_FORMAT)
+        # start_date: datetime = datetime.strptime(
+        #     request.args["start_date"], DATE_FORMAT
+        # )
+        # end_date: datetime = datetime.strptime(request.args["end_date"], DATE_FORMAT)
         distance: Optional[int] = request.args.get("distance", 5)
 
         # TODO: Get connection data from location service via GRPC
         results = ConnectionService.find_contacts(
             stub=connection_stub,
             person_id=int(person_id),
-            start_date=start_date,
-            end_date=end_date,
+            start_date=request.args["start_date"],
+            end_date=request.args["end_date"],
             meters=float(distance),
         )
         return results
