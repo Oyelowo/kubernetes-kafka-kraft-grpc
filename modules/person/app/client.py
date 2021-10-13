@@ -30,4 +30,4 @@ print("resppp3ll\n", response3)
 
 response = stub.GetAllPersons(person_pb2.Empty())
 print("resppp2KK", response)
-#print("resppp2", [MessageToDict(m, preserving_proto_field_name=True) for m in response.persons])
+print("resppp2", [MessageToDict(m, preserving_proto_field_name=True) for m in response.persons])
