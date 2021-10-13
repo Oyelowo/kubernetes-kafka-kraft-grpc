@@ -1,17 +1,17 @@
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, List
-from google.protobuf.json_format import MessageToJson, MessageToDict
-from app.udaconnect.schemas import ConnectionSchema, LocationSchema, PersonSchema
 
+from app.udaconnect.schemas import (ConnectionSchema, LocationSchema,
+                                    PersonSchema)
+from google.protobuf.json_format import MessageToDict, MessageToJson
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger("udaconnect-api")
 
 
-# import grpc
-
-from protobuf import person_pb2, connection_pb2_grpc, connection_pb2
+import grpc
+from protobuf import connection_pb2, connection_pb2_grpc, person_pb2
 
 # channel = grpc.insecure_channel("localhost:50051", options=(('grpc.enable_http_proxy', 0),))
 # stub = person_pb2_grpc.PersonServiceStub(channel)
@@ -19,7 +19,7 @@ from protobuf import person_pb2, connection_pb2_grpc, connection_pb2
 
 class ConnectionService:
     @staticmethod
-    def find_contacts(stub, person_id: int, start_date: datetime, end_date: datetime, meters=5
+    def find_contacts(person_id: int, start_date: datetime, end_date: datetime, meters=5
     ):
         # """
         # Finds all Person who have been within a given distance of a given Person within a date range.
@@ -29,11 +29,9 @@ class ConnectionService:
         # smoothly for a better user experience for API consumers?
         # """
     
-        # channel = grpc.insecure_channel("localhost:50053")
-        # #channel = grpc.insecure_channel(f"{api_person_host}:30002", options=(('grpc.enable_http_proxy', 0),))
-        # # stub = person_pb2_grpc.PersonServiceStub(channel)
-        # # location_stub = location_pb2_grpc.LocationServiceStub(channel)
-        # connection_stub = connection_pb2_grpc.ConnectionServiceStub(channel)
+        channel = grpc.insecure_channel("location:50051")
+        #channel = grpc.insecure_channel(f"{api_person_host}:30002", options=(('grpc.enable_http_proxy', 0),))
+        connection_stub = connection_pb2_grpc.ConnectionServiceStub(channel)
 
 
         connection_request = connection_pb2.GetConnectionRequest(
@@ -42,7 +40,7 @@ class ConnectionService:
             end_date = end_date,
             meters = meters,
             )
-        response = stub.GetConnection(connection_request)
+        response = connection_stub.GetConnection(connection_request)
 
         print("resppppp3\n", response)
         return [MessageToDict(m, preserving_proto_field_name=True) for m in response.connections]
@@ -88,20 +86,19 @@ class PersonService:
         )
 
         new_person = stub.CreatePerson(person) 
-        print("resppp", new_person)
+        print("Creating new person", new_person)
         return MessageToDict(new_person, preserving_proto_field_name=True)
 
 
     @staticmethod
     def retrieve(stub, person_id: int):
         person = stub.GetPerson(person_pb2.GetPersonRequest(id=person_id))
-        print("resppp3\n", person)
+        print("Retrieving person", person)
         return MessageToDict(person, preserving_proto_field_name=True)
 
     @staticmethod
     def retrieve_all(stub):
         response = stub.GetAllPersons(person_pb2.Empty())
-        print("resppp2", response)
-        # return  MessageToJson(response.persons[0], preserving_proto_field_name=True)
+        print("Retrieving all persons", response)
         return  [MessageToDict(m, preserving_proto_field_name=True) for m in response.persons]
 

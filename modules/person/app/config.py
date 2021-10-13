@@ -1,5 +1,6 @@
 import os
 from typing import List, Type
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
@@ -8,8 +9,6 @@ DB_PASSWORD = os.environ["DB_PASSWORD"]
 DB_HOST = os.environ["DB_HOST"]
 DB_PORT = os.environ["DB_PORT"]
 DB_NAME = os.environ["DB_NAME"]
-
-
 
 class BaseConfig:
     CONFIG_NAME = "base"

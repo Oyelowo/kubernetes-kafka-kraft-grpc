@@ -1,36 +1,6 @@
 # from __future__ import annotations
 
-# from config import db  # noqa
-# import uuid
-
-# from sqlalchemy import Column, Integer, String, create_engine
-
-# #engine = create_engine(‘mssql+pyodbc://server_name/database_name?driver=SQL Server?Trusted_Connection=yes’)
-
-# from sqlalchemy.dialects import postgresql
-
-# UUID = postgresql.UUID(as_uuid=True)
-
-# class Person(db.Model):
-#     __tablename__ = "person"
-
-#     id = Column(Integer, primary_key=True, autoincrement=True)
-#     # uid = Column(UUID, primary_key=True, default=uuid.uuid4, nullable=False)
-#     first_name = Column(String, nullable=False)
-#     last_name = Column(String, nullable=False)
-#     company_name = Column(String, nullable=False)
-    
-#     def jsonify(self):
-#         return {
-#             "id": self.id,
-#             "first_name": self.first_name,
-#             "last_name": self.last_name,
-#             "company_name": self.company_name,
-#         }
-
-
-
-from __future__ import annotations
+# from config import db  # noqafrom __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
@@ -39,9 +9,7 @@ from typing import Any
 from geoalchemy2 import Geometry
 from geoalchemy2.shape import to_shape
 from shapely.geometry.point import Point
-from sqlalchemy import (BigInteger, Column, Date, DateTime, ForeignKey,
-                        Integer, String)
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import BigInteger, Column, DateTime, Integer
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from config import db  # noqa
@@ -97,7 +65,6 @@ class Location(db.Model):
 class Connection:
     person: Any
     location: Location
-    # person: Person
 
     def jsonify(self):
         return {

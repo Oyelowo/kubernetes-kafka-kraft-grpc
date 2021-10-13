@@ -1,29 +1,26 @@
-from datetime import datetime
 import json
 import os
-from google.protobuf.json_format import MessageToJson
-from app.udaconnect.schemas import (
-    ConnectionSchema,
-    LocationSchema,
-    PersonSchema,
-)
-from app.udaconnect.services import ConnectionService, LocationService, PersonService
+from datetime import datetime
+from typing import List, Optional
+
+from app.udaconnect.schemas import (ConnectionSchema, LocationSchema,
+                                    PersonSchema)
+from app.udaconnect.services import (ConnectionService, LocationService,
+                                     PersonService)
 from flask import request
 from flask_accepts import accepts, responds
 from flask_restx import Namespace, Resource
-from typing import Optional, List
+from google.protobuf.json_format import MessageToJson
 
 DATE_FORMAT = "%Y-%m-%d"
 
 api = Namespace("UdaConnect", description="Connections via geolocation.")  # noqa
 import grpc
-
-from protobuf import person_pb2, person_pb2_grpc, connection_pb2_grpc
+from protobuf import connection_pb2_grpc, person_pb2, person_pb2_grpc
 
 api_person_host = os.getenv("API_PERSON_HOST", "localhost")
 api_location_host = os.getenv("API_LOCATION_HOST", "localhost")
 
-# channel = grpc.insecure_channel(f"{api_person_host}:50052", options=(('grpc.enable_http_proxy', 0),))
 channel = grpc.insecure_channel(f"{api_person_host}:50052")
 stub = person_pb2_grpc.PersonServiceStub(channel)
 
@@ -50,8 +47,6 @@ class LocationResource(Resource):
         # TODO: Get location data from location service via GRPC
         location = LocationService.retrieve(location_id)
         return location
-    
-from flask import Flask, jsonify
 
 @api.route("/persons")
 class PersonsResource(Resource):
@@ -67,16 +62,13 @@ class PersonsResource(Resource):
     def get(self):
         # TODO: Get all persons from person service via GRPC
         all_persons = PersonService.retrieve_all(stub)
-        # all_persons = stub.GetAllPersons(person_pb2.Empty())
-        print("resppp2", all_persons)
-
         return all_persons
 
 
 @api.route("/persons/<person_id>")
 @api.param("person_id", "Unique ID for a given Person", _in="query")
 class PersonResource(Resource):
-   # @responds(schema=PersonSchema)
+    @responds(schema=PersonSchema)
     def get(self, person_id):
         # TODO: Get person from person service via GRPC
         person = PersonService.retrieve(stub, int(person_id))
@@ -88,17 +80,12 @@ class PersonResource(Resource):
 @api.param("end_date", "Upper bound of date range", _in="query")
 @api.param("distance", "Proximity to a given user in meters", _in="query")
 class ConnectionDataResource(Resource):
-    # @responds(schema=ConnectionSchema, many=True)
+    @responds(schema=ConnectionSchema, many=True)
     def get(self, person_id) -> ConnectionSchema:
-        # start_date: datetime = datetime.strptime(
-        #     request.args["start_date"], DATE_FORMAT
-        # )
-        # end_date: datetime = datetime.strptime(request.args["end_date"], DATE_FORMAT)
         distance: Optional[int] = request.args.get("distance", 5)
 
         # TODO: Get connection data from location service via GRPC
         results = ConnectionService.find_contacts(
-            stub=connection_stub,
             person_id=int(person_id),
             start_date=request.args["start_date"],
             end_date=request.args["end_date"],

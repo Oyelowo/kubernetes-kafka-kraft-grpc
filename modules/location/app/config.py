@@ -1,5 +1,6 @@
 import os
 from typing import List, Type
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 

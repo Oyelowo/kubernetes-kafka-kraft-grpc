@@ -1,8 +1,11 @@
 
-import grpc
 import os
+
+import grpc
+from google.protobuf.json_format import MessageToDict, MessageToJson
+
 from protobuf import person_pb2, person_pb2_grpc
-from google.protobuf.json_format import MessageToJson, MessageToDict
+
 #channel = grpc.insecure_channel("localhost:50051")
 api_person_host = os.getenv("API_PERSON_HOST", "localhost")
 

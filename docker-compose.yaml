@@ -5,15 +5,12 @@ services:
     build:
       context: ./modules/api
       dockerfile: Dockerfile
-    #command: ["flask", "run", "--host=0.0.0.0"]
     image: api
-    # networks:
-    #   - microservices
     volumes:
       - ./api:/backend
     environment:
       - API_PERSON_HOST=person
-      - API_LOCATION_HOST=location
+      - API_LOCATION_HOST=location # the container name
       - FLASK_ENV=development
       - FLASK_APP=app.py
     ports:
@@ -23,19 +20,14 @@ services:
     build:
       context: ./modules/person/
       dockerfile: Dockerfile
-    #command: ["python3", "./app/server.py"]
     image: api_person
     container_name: person
-    # networks:
-    #   - microservices
     environment:
       - DB_USERNAME=ct_admin
       - DB_NAME=person
       - DB_HOST=postgres_person
       - DB_PORT=5432
       - DB_PASSWORD=wowimsosecure%
-      #- FLASK_ENV=development
-      #- FLASK_APP=app.py
     ports:
       - "50052:50052"
 
@@ -44,16 +36,10 @@ services:
     container_name: postgres-person
     ports:
       - "5433:5432"
-      # - 5432:5432/tcp
     environment:
       - POSTGRES_USER=ct_admin
       - POSTGRES_PASSWORD=wowimsosecure%
       - POSTGRES_DB=person
-      # DB_USERNAME: "ct_admin"
-      # DB_NAME: "geoconnections"
-      # DB_HOST: "postgres"
-      # DB_PORT: "5432"
-      # DB_PASSWORD: wowimsosecure%
     volumes:
       - /var/lib/postgres
       - dbscripts:/docker-entrypoint-initdb.d
@@ -62,11 +48,8 @@ services:
     build:
       context: ./modules/location/
       dockerfile: Dockerfile
-    #command: ["python3", "./app/server.py"]
     image: api_location
     container_name: location
-    # networks:
-    #   - microservices
     environment:
       - DB_USERNAME=ct_admin
       - DB_NAME=location
@@ -74,8 +57,6 @@ services:
       - DB_PORT=5432
       - DB_PASSWORD=wowimsosecure%
       - API_PERSON_HOST=person
-      #- FLASK_ENV=development
-      #- FLASK_APP=app.py
     ports:
       - "50051:50051"
 
@@ -84,16 +65,10 @@ services:
     container_name: postgres-location
     ports:
       - "5434:5432"
-      # - 5432:5432/tcp
     environment:
       - POSTGRES_USER=ct_admin
       - POSTGRES_PASSWORD=wowimsosecure%
       - POSTGRES_DB=location
-      # DB_USERNAME: "ct_admin"
-      # DB_NAME: "location"
-      # DB_HOST: "postgres"
-      # DB_PORT: "5433"
-      # DB_PASSWORD: wowimsosecure%
     volumes:
       - /var/lib/postgres
       - dbscripts/:/docker-entrypoint-initdb.d
@@ -104,8 +79,6 @@ services:
       context: ./modules/frontend
       dockerfile: Dockerfile
     command: ["npm", "start"]
-    # networks:
-    #   - microservices
     volumes:
       - ./client:/frontend
       - dbscripts:/frontend/node_modules
@@ -132,8 +105,6 @@ services:
   #   volumes:
   #    - dbscripts:/mnt/kafka
 
-# networks:
-#   microservices:
 volumes:
   # node-modules:
   dbscripts:

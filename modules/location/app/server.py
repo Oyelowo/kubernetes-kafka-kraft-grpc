@@ -1,17 +1,20 @@
-from datetime import datetime
 import json
 import os
 from concurrent import futures
+from datetime import datetime
+
 import grpc
 from flask import Flask, Response, g, jsonify, request
 from kafka import KafkaProducer
-# from schemas import LocationSchema
 
 from config import create_app
 from protobuf import (connection_pb2, connection_pb2_grpc, location_pb2,
                       location_pb2_grpc, person_pb2, person_pb2_grpc)
-
 from services import ConnectionService
+
+# from schemas import LocationSchema
+
+
 
 DATE_FORMAT = "%Y-%m-%d"
 
@@ -78,10 +81,6 @@ class ConnectionServicer(connection_pb2_grpc.ConnectionServiceServicer):
         print(request_value)
         connections_db = ConnectionService.find_contacts(**request_value)
         connection_response = connection_pb2.ConnectionResponse()
-        #print("SHRGEFSDA", [location_pb2.Location(**c.location.jsonify()) for c in connections_db])
-        # print("RRRRRRRRR", [person_pb2.Person(**c.person) for c in connections_db])
-        print("RRRRRRRRR", [connection_pb2.Connection(person=person_pb2.Person(**c.person), location=location_pb2.Location(**c.location.jsonify())) for c in connections_db])
-        #connection_response.connections.extend([connection_pb2.Connection(person=person_pb2.Person(**c.person), location=location_pb2.Location(**c.location.jsonify())) for c in connections_db])
         connection_response.connections.extend([connection_pb2.Connection(person=c.person, location=c.location.jsonify()) for c in connections_db])
 
         return connection_response
@@ -92,7 +91,6 @@ class Server:
     @staticmethod
     def run():
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        # location_pb2_grpc.add_ConnectionServiceServicer_to_server(ConnectionServicer(), server)
         connection_pb2_grpc.add_ConnectionServiceServicer_to_server(ConnectionServicer(), server)
         create_app(os.getenv("FLASK_ENV") or "test")
         server.add_insecure_port('[::]:50051')
@@ -103,47 +101,3 @@ class Server:
 if __name__ == '__main__':
     Server.run()
 
-
-# from concurrent import futures
-# import os
-# import grpc
-
-
-# from config import  create_app
-
-# from protobuf import person_pb2, person_pb2_grpc
-
-
-# class PersonServicer(person_pb2_grpc.PersonServiceServicer):
-#     def GetPerson(self, request, context):
-
-#         request_value = {
-#                  "id" : request.id,
-#                 "first_name" : "request.first_name",
-#                 "last_name" : "request.last_name",
-#                 "company_name" : "request.company_name",
-#         }
-#         print(request_value)
-#         person = person_pb2.Person(       
-#                 id = request.id,
-#                 first_name = "request.first_name",
-#                 last_name = "request.last_name",
-#                 company_name = "request.company_name")
-#         print("Get it person,", person)
-#         return person
-
-
-# class Server:
-
-#     @staticmethod
-#     def run():
-#         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-#         person_pb2_grpc.add_PersonServiceServicer_to_server(PersonServicer(), server)
-#         create_app(os.getenv("FLASK_ENV") or "test")
-#         server.add_insecure_port('[::]:50051')
-#         server.start()
-#         server.wait_for_termination()
-
-
-# if __name__ == '__main__':
-#     Server.run()

@@ -1,14 +1,18 @@
 
-import grpc
 import os
+
+import grpc
+from google.protobuf.json_format import MessageToDict, MessageToJson
+
 # from protobuf import person_pb2, person_pb2_grp
-from protobuf import connection_pb2, connection_pb2_grpc, person_pb2, person_pb2_grpc
-from google.protobuf.json_format import MessageToJson, MessageToDict
+from protobuf import (connection_pb2, connection_pb2_grpc, person_pb2,
+                      person_pb2_grpc)
 
 #channel = grpc.insecure_channel("localhost:50051")
 api_person_host = os.getenv("API_PERSON_HOST", "localhost")
 api_location_host = os.getenv("API_LOCATION_HOST", "localhost")
-from google.protobuf.json_format import MessageToJson, MessageToDict
+from google.protobuf.json_format import MessageToDict, MessageToJson
+
 # port 30002 has been mapped in the to from guest to host in the VM with vagrant
 # Host: 192.168.50.4 or localhost
 channel = grpc.insecure_channel("localhost:50051")

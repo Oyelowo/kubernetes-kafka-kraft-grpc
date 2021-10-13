@@ -1,23 +1,23 @@
 import logging
 import os
+from datetime import datetime, timedelta
 from typing import Dict, List
 
-
-from datetime import datetime, timedelta
 import grpc
-
-from models import Connection, Location
-from config import db
 from geoalchemy2.functions import ST_AsText, ST_Point
+from google.protobuf.json_format import MessageToDict, MessageToJson
 from sqlalchemy.sql import text
+
+from config import db
+from models import Connection, Location
 from protobuf import person_pb2, person_pb2_grpc
-from google.protobuf.json_format import MessageToJson, MessageToDict
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger("udaconnect-api-location")
 
 import json
-from flask import Flask, jsonify, request, g, Response
+
+from flask import Flask, Response, g, jsonify, request
 
 
 def create_order(order_data):
@@ -32,7 +32,7 @@ def create_order(order_data):
 
 
 #channel = grpc.insecure_channel("localhost:50051")
-api_person_host = os.getenv("API_PERSON_HOST", "localhost")
+api_person_host = os.getenv("API_PERSON_HOST")
 
 # port 30002 has been mapped in the to from guest to host in the VM with vagrant
 # Host: 192.168.50.4 or localhost
@@ -45,8 +45,8 @@ class PersonService:
 
         response = stub.GetAllPersons(person_pb2.Empty())
         print("GERW", response)
-        # return  [MessageToDict(m, preserving_proto_field_name=True) for m in response.persons]
-        return [{'id': 5, 'first_name': 'Taco', 'last_name': 'Fargo', 'company_name': 'Alpha Omega Upholstery'}, {'id': 6, 'first_name': 'Frank', 'last_name': 'Shader', 'company_name': 'USDA'}, {'id': 1, 'first_name': 'Pam', 'last_name': 'Trexler', 'company_name': 'Hampton, Hampton and McQuill'}, {'id': 8, 'first_name': 'Paul', 'last_name': 'Badman', 'company_name': 'Paul Badman & Associates'}, {'id': 9, 'first_name': 'Otto', 'last_name': 'Spring', 'company_name': 'The Chicken Sisters Restaurant'}]
+        return  [MessageToDict(m, preserving_proto_field_name=True) for m in response.persons]
+        # return [{'id': 5, 'first_name': 'Taco', 'last_name': 'Fargo', 'company_name': 'Alpha Omega Upholstery'}, {'id': 6, 'first_name': 'Frank', 'last_name': 'Shader', 'company_name': 'USDA'}, {'id': 1, 'first_name': 'Pam', 'last_name': 'Trexler', 'company_name': 'Hampton, Hampton and McQuill'}, {'id': 8, 'first_name': 'Paul', 'last_name': 'Badman', 'company_name': 'Paul Badman & Associates'}, {'id': 9, 'first_name': 'Otto', 'last_name': 'Spring', 'company_name': 'The Chicken Sisters Restaurant'}]
 
 
 

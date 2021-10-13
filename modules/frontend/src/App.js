@@ -1,7 +1,7 @@
 import React from "react";
 import "./App.css";
-import logo from "./images/UdaConnectLogo.svg";
 import Persons from "./components/Persons";
+import logo from "./images/UdaConnectLogo.svg";
 
 function App() {
   return (
