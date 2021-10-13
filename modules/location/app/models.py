@@ -89,7 +89,7 @@ class Location(db.Model):
             "person_id": self.person_id,
             "longitude": self.longitude,
             "latitude": self.latitude,
-            "creation_time": str(self.creation_time),
+            "creation_time": self.creation_time.isoformat(timespec='seconds'),
         }
 
 

@@ -51,7 +51,7 @@ class Server:
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         person_pb2_grpc.add_PersonServiceServicer_to_server(PersonServicer(), server)
         create_app(os.getenv("FLASK_ENV") or "test")
-        server.add_insecure_port('[::]:50051')
+        server.add_insecure_port('[::]:50052')
         server.start()
         server.wait_for_termination()
 

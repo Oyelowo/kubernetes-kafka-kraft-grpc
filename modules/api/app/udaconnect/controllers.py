@@ -18,14 +18,17 @@ DATE_FORMAT = "%Y-%m-%d"
 api = Namespace("UdaConnect", description="Connections via geolocation.")  # noqa
 import grpc
 
-from protobuf import person_pb2, person_pb2_grpc
+from protobuf import person_pb2, person_pb2_grpc, connection_pb2_grpc
 
 api_person_host = os.getenv("API_PERSON_HOST", "localhost")
+api_location_host = os.getenv("API_LOCATION_HOST", "localhost")
 
-channel = grpc.insecure_channel(f"{api_person_host}:50051", options=(('grpc.enable_http_proxy', 0),))
+# channel = grpc.insecure_channel(f"{api_person_host}:50052", options=(('grpc.enable_http_proxy', 0),))
+channel = grpc.insecure_channel(f"{api_person_host}:50052")
 stub = person_pb2_grpc.PersonServiceStub(channel)
 
-
+connection_channel = grpc.insecure_channel(f"{api_location_host}:50051")
+connection_stub = connection_pb2_grpc.ConnectionServiceStub(connection_channel)
 
 # TODO: This needs better exception handling
 
@@ -85,7 +88,7 @@ class PersonResource(Resource):
 @api.param("end_date", "Upper bound of date range", _in="query")
 @api.param("distance", "Proximity to a given user in meters", _in="query")
 class ConnectionDataResource(Resource):
-    @responds(schema=ConnectionSchema, many=True)
+    # @responds(schema=ConnectionSchema, many=True)
     def get(self, person_id) -> ConnectionSchema:
         start_date: datetime = datetime.strptime(
             request.args["start_date"], DATE_FORMAT
@@ -95,9 +98,10 @@ class ConnectionDataResource(Resource):
 
         # TODO: Get connection data from location service via GRPC
         results = ConnectionService.find_contacts(
-            person_id=person_id,
+            stub=connection_stub,
+            person_id=int(person_id),
             start_date=start_date,
             end_date=end_date,
-            meters=distance,
+            meters=float(distance),
         )
         return results
