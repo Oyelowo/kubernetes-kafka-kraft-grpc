@@ -47,6 +47,13 @@ class PersonService:
         print("GERW", response)
         return  [MessageToDict(m, preserving_proto_field_name=True) for m in response.persons]
         # return [{'id': 5, 'first_name': 'Taco', 'last_name': 'Fargo', 'company_name': 'Alpha Omega Upholstery'}, {'id': 6, 'first_name': 'Frank', 'last_name': 'Shader', 'company_name': 'USDA'}, {'id': 1, 'first_name': 'Pam', 'last_name': 'Trexler', 'company_name': 'Hampton, Hampton and McQuill'}, {'id': 8, 'first_name': 'Paul', 'last_name': 'Badman', 'company_name': 'Paul Badman & Associates'}, {'id': 9, 'first_name': 'Otto', 'last_name': 'Spring', 'company_name': 'The Chicken Sisters Restaurant'}]
+    
+    @staticmethod
+    def retrieve(person_id):
+        person = stub.GetPerson(person_pb2.GetPersonRequest(id=person_id))
+        print("Successfully fetches user", person)
+        return  MessageToDict(person, preserving_proto_field_name=True)
+        # return [{'id': 5, 'first_name': 'Taco', 'last_name': 'Fargo', 'company_name': 'Alpha Omega Upholstery'}, {'id': 6, 'first_name': 'Frank', 'last_name': 'Shader', 'company_name': 'USDA'}, {'id': 1, 'first_name': 'Pam', 'last_name': 'Trexler', 'company_name': 'Hampton, Hampton and McQuill'}, {'id': 8, 'first_name': 'Paul', 'last_name': 'Badman', 'company_name': 'Paul Badman & Associates'}, {'id': 9, 'first_name': 'Otto', 'last_name': 'Spring', 'company_name': 'The Chicken Sisters Restaurant'}]
 
 
 
@@ -67,10 +74,15 @@ class ConnectionService:
         ).filter(Location.creation_time < end_date).filter(
             Location.creation_time >= start_date
         ).all()
-
-        # TODO: Get persons from person sevice using grpc protobuf
+        
+        # NOTE: 
+        # This was the original implementation but doesn't seem optimal as we are 
+        # trying to fetch all users from the database even though we will only need a fraction
+        # of that. Below, each user data is fetched individually from the Person service, so
+        # we only get what we use or need
+        
         # Cache all users in memory for quick lookup
-        person_map = {person["id"]: person for person in PersonService.retrieve_all()}
+        # person_map = {person["id"]: person for person in PersonService.retrieve_all()}
 
         # Prepare arguments for queries
         data = []
@@ -114,7 +126,7 @@ class ConnectionService:
 
                 result.append(
                     Connection(
-                        person=person_map[exposed_person_id], location=location,
+                        person=PersonService.retrieve(exposed_person_id), location=location,
                     )
                 )
 
