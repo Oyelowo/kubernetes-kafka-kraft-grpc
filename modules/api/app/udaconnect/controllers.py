@@ -18,17 +18,20 @@ api = Namespace("UdaConnect", description="Connections via geolocation.")  # noq
 import grpc
 from protobuf import connection_pb2_grpc, person_pb2, person_pb2_grpc
 
-api_person_host = os.getenv("API_PERSON_HOST", "localhost")
-api_location_host = os.getenv("API_LOCATION_HOST", "localhost")
 
-channel = grpc.insecure_channel(f"{api_person_host}:50052")
-stub = person_pb2_grpc.PersonServiceStub(channel)
+API_LOCATION_HOST = os.getenv("API_LOCATION_HOST", "localhost")
+API_LOCATION_PORT = os.getenv("API_LOCATION_PORT", "localhost")
 
-connection_channel = grpc.insecure_channel(f"{api_location_host}:50051")
+API_PERSON_HOST = os.getenv("API_PERSON_HOST")
+API_PERSON_PORT = os.getenv("API_PERSON_PORT")
+
+person_channel = grpc.insecure_channel(f"{API_PERSON_HOST}:{API_PERSON_PORT}")
+person_stub = person_pb2_grpc.PersonServiceStub(person_channel)
+
+connection_channel = grpc.insecure_channel(f"{API_LOCATION_HOST}:{API_LOCATION_PORT}")
 connection_stub = connection_pb2_grpc.ConnectionServiceStub(connection_channel)
 
 # TODO: This needs better exception handling
-
 
 @api.route("/locations")
 @api.route("/locations/<location_id>")
@@ -55,13 +58,13 @@ class PersonsResource(Resource):
     def post(self):
         payload = request.get_json()
         # TODO: Send Person payload to person service via GRPC
-        new_person = PersonService.create(stub, payload)
+        new_person = PersonService.create(person_stub, payload)
         return str(new_person)
 
     @responds(schema=PersonSchema, many=True)
     def get(self):
         # TODO: Get all persons from person service via GRPC
-        all_persons = PersonService.retrieve_all(stub)
+        all_persons = PersonService.retrieve_all(person_stub)
         return all_persons
 
 
@@ -71,7 +74,7 @@ class PersonResource(Resource):
     @responds(schema=PersonSchema)
     def get(self, person_id):
         # TODO: Get person from person service via GRPC
-        person = PersonService.retrieve(stub, int(person_id))
+        person = PersonService.retrieve(person_stub, int(person_id))
         return person
 
 

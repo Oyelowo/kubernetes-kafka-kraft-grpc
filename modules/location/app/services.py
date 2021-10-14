@@ -32,20 +32,20 @@ def create_order(order_data):
 
 
 #channel = grpc.insecure_channel("localhost:50051")
-api_person_host = os.getenv("API_PERSON_HOST")
+API_PERSON_HOST = os.getenv("API_PERSON_HOST")
+API_PERSON_PORT = os.getenv("API_PERSON_PORT")
 
 # port 30002 has been mapped in the to from guest to host in the VM with vagrant
 # Host: 192.168.50.4 or localhost
-channel = grpc.insecure_channel(f"{api_person_host}:50052")
+channel = grpc.insecure_channel(f"{API_PERSON_HOST}:{API_PERSON_PORT}")
 #channel = grpc.insecure_channel(f"{api_person_host}:30002", options=(('grpc.enable_http_proxy', 0),))
 stub = person_pb2_grpc.PersonServiceStub(channel)
 class PersonService:
     @staticmethod
     def retrieve_all():
-
         response = stub.GetAllPersons(person_pb2.Empty())
-        print("GERW", response)
-        return  [MessageToDict(m, preserving_proto_field_name=True) for m in response.persons]
+        print("Successfully fetches all persons", response)
+        return  [MessageToDict(p, preserving_proto_field_name=True) for p in response.persons]
         # return [{'id': 5, 'first_name': 'Taco', 'last_name': 'Fargo', 'company_name': 'Alpha Omega Upholstery'}, {'id': 6, 'first_name': 'Frank', 'last_name': 'Shader', 'company_name': 'USDA'}, {'id': 1, 'first_name': 'Pam', 'last_name': 'Trexler', 'company_name': 'Hampton, Hampton and McQuill'}, {'id': 8, 'first_name': 'Paul', 'last_name': 'Badman', 'company_name': 'Paul Badman & Associates'}, {'id': 9, 'first_name': 'Otto', 'last_name': 'Spring', 'company_name': 'The Chicken Sisters Restaurant'}]
     
     @staticmethod
@@ -53,7 +53,6 @@ class PersonService:
         person = stub.GetPerson(person_pb2.GetPersonRequest(id=person_id))
         print("Successfully fetches user", person)
         return  MessageToDict(person, preserving_proto_field_name=True)
-        # return [{'id': 5, 'first_name': 'Taco', 'last_name': 'Fargo', 'company_name': 'Alpha Omega Upholstery'}, {'id': 6, 'first_name': 'Frank', 'last_name': 'Shader', 'company_name': 'USDA'}, {'id': 1, 'first_name': 'Pam', 'last_name': 'Trexler', 'company_name': 'Hampton, Hampton and McQuill'}, {'id': 8, 'first_name': 'Paul', 'last_name': 'Badman', 'company_name': 'Paul Badman & Associates'}, {'id': 9, 'first_name': 'Otto', 'last_name': 'Spring', 'company_name': 'The Chicken Sisters Restaurant'}]
 
 
 
