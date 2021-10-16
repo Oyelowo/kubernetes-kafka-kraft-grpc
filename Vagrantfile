@@ -21,7 +21,8 @@ Vagrant.configure("2") do |config|
       v.memory = "4096"
       v.name = "master"
       end
-    master.vm.provision "file", source: "./", destination: "$HOME/"
+    # master.vm.provision "file", source: "./", destination: "$HOME/"
+    master.vm.provision "file", source: "./", destination: "./"
     master.vm.provision "shell", inline: <<-SHELL
     sudo zypper --non-interactive install apparmor-parser
     curl -sfL https://get.k3s.io | sh -
