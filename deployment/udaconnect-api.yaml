@@ -47,10 +47,10 @@ spec:
           # value: 192.168.50.4
           # value: localhost
         - name: API_PERSON_PORT
-          value: "30002"
+          value: "50052"
         - name: API_LOCATION_HOST
           value: udaconnect-api-location
         - name: API_LOCATION_PORT
-          value: "30003"
+          value: "50051"
        
       restartPolicy: Always
