@@ -12,7 +12,7 @@ logger = logging.getLogger("udaconnect-api")
 
 
 import grpc
-from protobuf import connection_pb2, connection_pb2_grpc, person_pb2
+from .protobuf import connection_pb2, connection_pb2_grpc, location_pb2, location_pb2_grpc, person_pb2
 
 # channel = grpc.insecure_channel("localhost:50051", options=(('grpc.enable_http_proxy', 0),))
 # stub = person_pb2_grpc.PersonServiceStub(channel)
@@ -55,9 +55,9 @@ class LocationService:
     @staticmethod
     def retrieve(location_id):
         location_channel = grpc.insecure_channel(f"{API_LOCATION_HOST}:{API_LOCATION_PORT}")
-        location_stub = connection_pb2_grpc.ConnectionServiceStub(location_channel)
+        location_stub = location_pb2_grpc.LocationServiceStub(location_channel)
         
-        location = person_pb2.GetLocationRequest(
+        location = location_pb2.GetLocationRequest(
             id =location_id,
         )
         retrieved_location = location_stub.GetLocation(location) 
@@ -68,9 +68,9 @@ class LocationService:
     @staticmethod
     def create(location: Dict):
         location_channel = grpc.insecure_channel(f"{API_LOCATION_HOST}:{API_LOCATION_PORT}")
-        location_stub = connection_pb2_grpc.ConnectionServiceStub(location_channel)
+        location_stub = location_pb2_grpc.LocationServiceStub(location_channel)
         
-        location = person_pb2.CreateLocationnRequest(
+        location = location_pb2.CreateLocationnRequest(
             person_id = location["person_id"],
             longitude = location["longitude"],
             latitude = location["latitude"],
