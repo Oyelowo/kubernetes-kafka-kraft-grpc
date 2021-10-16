@@ -8,9 +8,10 @@ from flask import Flask, Response, g, jsonify, request
 from kafka import KafkaProducer
 
 from config import create_app
+from services import ConnectionService, LocationService
+
 from protobuf import (connection_pb2, connection_pb2_grpc, location_pb2,
-                      location_pb2_grpc, person_pb2, person_pb2_grpc)
-from services import ConnectionService
+                       location_pb2_grpc, person_pb2, person_pb2_grpc)
 
 # from schemas import LocationSchema
 
@@ -84,6 +85,29 @@ class ConnectionServicer(connection_pb2_grpc.ConnectionServiceServicer):
         connection_response.connections.extend([connection_pb2.Connection(person=c.person, location=c.location.jsonify()) for c in connections_db])
 
         return connection_response
+    
+class LocationServicer(location_pb2_grpc.LocationServiceServicer):
+    def CreateLocation(self, request, context):
+        request_value = {
+                "person_id" : request.person_id,
+                "longitude" : request.longitude,
+                "latitude" : request.latitude,
+                "creation_time" : request.creation_time,
+        }
+        print(request_value)
+        new_location = LocationService.create(request_value)
+
+        location = location_pb2.Location(**new_location.jsonify())
+
+        return location
+    def GetConnection(self, request, context):
+        request_value = {
+                "id" : request.id,
+        }
+        print(request_value)
+        location_db = LocationService.retrieve(**request_value)
+        print("Successfuly gets location from locaation service,", location_db)
+        return location_pb2.Location(**location_db.jsonify())
 
  
 
@@ -92,6 +116,7 @@ class Server:
     def run():
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         connection_pb2_grpc.add_ConnectionServiceServicer_to_server(ConnectionServicer(), server)
+        location_pb2_grpc.add_LocationServiceServicer_to_server(LocationServicer(), server)
         create_app(os.getenv("FLASK_ENV") or "test")
         server.add_insecure_port('[::]:50051')
         server.start()

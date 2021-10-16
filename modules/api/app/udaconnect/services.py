@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timedelta
+import os
 from typing import Dict, List
 
 from app.udaconnect.schemas import (ConnectionSchema, LocationSchema,
@@ -16,7 +17,11 @@ from protobuf import connection_pb2, connection_pb2_grpc, person_pb2
 # channel = grpc.insecure_channel("localhost:50051", options=(('grpc.enable_http_proxy', 0),))
 # stub = person_pb2_grpc.PersonServiceStub(channel)
 
+API_LOCATION_HOST = os.getenv("API_LOCATION_HOST")
+API_LOCATION_PORT = os.getenv("API_LOCATION_PORT")
 
+API_PERSON_HOST = os.getenv("API_PERSON_HOST")
+API_PERSON_PORT = os.getenv("API_PERSON_PORT")
 class ConnectionService:
     @staticmethod
     def find_contacts(person_id: int, start_date: datetime, end_date: datetime, meters=5
@@ -29,9 +34,9 @@ class ConnectionService:
         # smoothly for a better user experience for API consumers?
         # """
     
-        channel = grpc.insecure_channel("location:50051")
+        connection_channel = grpc.insecure_channel(f"{API_LOCATION_HOST}:{API_LOCATION_PORT}")
         #channel = grpc.insecure_channel(f"{api_person_host}:30002", options=(('grpc.enable_http_proxy', 0),))
-        connection_stub = connection_pb2_grpc.ConnectionServiceStub(channel)
+        connection_stub = connection_pb2_grpc.ConnectionServiceStub(connection_channel)
 
 
         connection_request = connection_pb2.GetConnectionRequest(
@@ -49,31 +54,31 @@ class ConnectionService:
 class LocationService:
     @staticmethod
     def retrieve(location_id):
-        # location, coord_text = (
-        #     db.session.query(Location, Location.coordinate.ST_AsText())
-        #     .filter(Location.id == location_id)
-        #     .one()
-        # )
+        location_channel = grpc.insecure_channel(f"{API_LOCATION_HOST}:{API_LOCATION_PORT}")
+        location_stub = connection_pb2_grpc.ConnectionServiceStub(location_channel)
+        
+        location = person_pb2.GetLocationRequest(
+            id =location_id,
+        )
+        retrieved_location = location_stub.GetLocation(location) 
+        print("Getting locaation:", retrieved_location)
+        return MessageToDict(retrieved_location, preserving_proto_field_name=True)
 
-        # # Rely on database to return text form of point to reduce overhead of conversion in app code
-        # location.wkt_shape = coord_text
-        return "location"
 
     @staticmethod
     def create(location: Dict):
-        # validation_results: Dict = LocationSchema().validate(location)
-        # if validation_results:
-        #     logger.warning(f"Unexpected data format in payload: {validation_results}")
-        #     raise Exception(f"Invalid payload: {validation_results}")
-
-        # new_location = Location()
-        # new_location.person_id = location["person_id"]
-        # new_location.creation_time = location["creation_time"]
-        # new_location.coordinate = ST_Point(location["latitude"], location["longitude"])
-        # db.session.add(new_location)
-        # db.session.commit()
-
-        return "new_location"
+        location_channel = grpc.insecure_channel(f"{API_LOCATION_HOST}:{API_LOCATION_PORT}")
+        location_stub = connection_pb2_grpc.ConnectionServiceStub(location_channel)
+        
+        location = person_pb2.CreateLocationnRequest(
+            person_id = location["person_id"],
+            longitude = location["longitude"],
+            latitude = location["latitude"],
+            creation_time = location["creation_time"]
+        )
+        new_location = location_stub.CreateLocation(location) 
+        print("Creating new location", new_location)
+        return MessageToDict(new_location, preserving_proto_field_name=True)
 
 
 class PersonService:

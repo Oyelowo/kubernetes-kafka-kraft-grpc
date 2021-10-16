@@ -50,4 +50,4 @@ kubectl delete pods --all
 kubectl delete svc --all 
 kubectl delete configmaps --all 
 
- kubectl apply -f deployment/  
+kubectl apply -f deployment/  
