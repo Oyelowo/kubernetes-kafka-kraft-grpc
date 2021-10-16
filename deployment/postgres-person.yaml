@@ -40,9 +40,9 @@ spec:
     app: postgres-person
   ports:
    - name: "5433"
-     port: 5432
-     # targetPort: 5432
-     # nodePort: 30010
+     port: 5433
+     targetPort: 5432
+     nodePort: 30010
 ---
 apiVersion: apps/v1
 kind: StatefulSet

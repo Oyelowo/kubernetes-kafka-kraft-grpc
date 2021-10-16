@@ -45,7 +45,7 @@ spec:
         - name: API_PERSON_HOST
           value: udaconnect-api-person
         - name: API_PERSON_PORT
-          value: "30002"
+          value: "50052"
         - name: DB_USERNAME
           valueFrom:
             configMapKeyRef:

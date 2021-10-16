@@ -48,3 +48,6 @@ kubectl delete deployments --all
 kubectl delete statefulsets --all
 kubectl delete pods --all 
 kubectl delete svc --all 
+kubectl delete configmaps --all 
+
+ kubectl apply -f deployment/  

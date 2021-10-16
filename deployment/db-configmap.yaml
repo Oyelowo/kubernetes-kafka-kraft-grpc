@@ -4,11 +4,11 @@ data:
   LOCATION_DB_USERNAME: "ct_admin"
   LOCATION_DB_NAME: "location"
   LOCATION_DB_HOST: "postgres-location"
-  LOCATION_DB_PORT: "5432"
+  LOCATION_DB_PORT: "5434"
   PERSON_DB_USERNAME: "ct_admin"
   PERSON_DB_NAME: "person"
-  PERSON_DB_HOST: "postgres-person"
-  PERSON_DB_PORT: "5432"
+  PERSON_DB_HOST: "postgres-person" # Service name
+  PERSON_DB_PORT: "5433"
   API_PERSON_HOST: udaconnect-api-person
   API_PERSON_PORT: "30002"
   API_LOCATION_HOST: udaconnect-api-location
