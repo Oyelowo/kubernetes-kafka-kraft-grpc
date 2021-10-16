@@ -41,3 +41,10 @@ For location
 `kubectl exec -it postgres-location-0 -- /bin/bash`
 `psql "dbname=location host=localhost user=ct_admin password=wowiamsosecure% port=5432"`
 
+
+
+
+kubectl delete deployments --all 
+kubectl delete statefulsets --all
+kubectl delete pods --all 
+kubectl delete svc --all 

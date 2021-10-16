@@ -31,7 +31,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-person-svc
+  name: postgres-person
   labels:
     app: postgres-person
 spec:
@@ -40,16 +40,16 @@ spec:
     app: postgres-person
   ports:
    - name: "5433"
-     port: 5433
-     targetPort: 5432
-     nodePort: 30010
+     port: 5432
+     # targetPort: 5432
+     # nodePort: 30010
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres-person
 spec:
-  serviceName: postgres-person-svc
+  serviceName: postgres-person
   replicas: 1
   selector:
     matchLabels:
