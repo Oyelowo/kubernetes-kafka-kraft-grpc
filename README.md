@@ -1,5 +1,7 @@
 # Instructions
 
+## Application architecture
+![Connect App Rearchitecture](./docs/architecture_design.png)
 ## Running the App in kubernetes
 
 1- Launch the virtual machine with virtual box. Download first if you dont have vagrant and virutal box. This also launches
