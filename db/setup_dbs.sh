@@ -24,4 +24,4 @@ cat ./db/udaconnect_public_location.sql | kubectl exec -i postgres-location-0 --
 
 
 # Cration locaiton kafka topic
-`kubectl exec -i kafka-0 -n kafka-kraft -- bash -c "kafka-topics.sh --create --topic location --partitions 3 --replication-factor 3 --bootstrap-server localhost:9092"`
+`kubectl exec -i kafka-0 -n kafka-kraft -- bash -c "kafka-topics.sh --create --topic location --partitions 3 --replication-factor 3 --bootstrap-server kafka-svc.kafka-kraft.svc.cluster.local:9092""`
