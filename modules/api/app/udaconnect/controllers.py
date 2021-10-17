@@ -51,6 +51,7 @@ class LocationResource(Resource):
         kafka_data = json.dumps(data).encode()
         print("Sending data to kafka", kafka_data)
         producer.send('location', kafka_data)
+        producer.flush()
 
         # location = LocationService.create(request.get_json())
         # return request.get_json()

@@ -5,13 +5,12 @@ from datetime import datetime
 
 import grpc
 from flask import Flask, Response, g, jsonify, request
-from kafka import KafkaProducer
+from kafka import KafkaConsumer, KafkaProducer
 
 from config import create_app
-from services import ConnectionService, LocationService
-
 from protobuf import (connection_pb2, connection_pb2_grpc, location_pb2,
-                       location_pb2_grpc, person_pb2, person_pb2_grpc)
+                      location_pb2_grpc, person_pb2, person_pb2_grpc)
+from services import ConnectionService, LocationService
 
 # from schemas import LocationSchema
 
@@ -112,6 +111,27 @@ class LocationServicer(location_pb2_grpc.LocationServiceServicer):
 
  
 
+print("Successfully RUNSSSSS")
+def consume_location():
+    KAFKA_HOST = os.getenv("KAFKA_HOST")
+    KAFKA_PORT = os.getenv("KAFKA_PORT")
+    location_topic = "location"
+    consumer = KafkaConsumer(
+        location_topic,
+        bootstrap_servers=[f"{KAFKA_HOST}:{KAFKA_PORT}"],
+        # auto_offset_reset="earliest",
+        auto_offset_reset="latest",
+        enable_auto_commit=True,
+        # group_id="location_consumer_group",
+        value_deserializer=lambda x: json.loads(x.decode('utf-8'))
+    )
+    
+    for msg in consumer:
+        print("msg", msg.value)
+        LocationService.create(msg.value)
+        print("Successfully stores location")
+
+
 class Server:
     @staticmethod
     def run():
@@ -119,7 +139,9 @@ class Server:
         connection_pb2_grpc.add_ConnectionServiceServicer_to_server(ConnectionServicer(), server)
         location_pb2_grpc.add_LocationServiceServicer_to_server(LocationServicer(), server)
         create_app(os.getenv("FLASK_ENV") or "test")
+        consume_location()
         server.add_insecure_port('[::]:50051')
+        
         server.start()
         server.wait_for_termination()
 
