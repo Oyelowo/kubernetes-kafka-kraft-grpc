@@ -111,7 +111,7 @@ class LocationServicer(location_pb2_grpc.LocationServiceServicer):
 
  
 
-print("Successfully RUNSSSSS")
+
 def consume_location():
     KAFKA_HOST = os.getenv("KAFKA_HOST")
     KAFKA_PORT = os.getenv("KAFKA_PORT")
