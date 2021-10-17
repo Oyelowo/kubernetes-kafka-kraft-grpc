@@ -33,3 +33,38 @@ sed -e "s+^node.id=.*+node.id=$NODE_ID+" \
 kafka-storage.sh format -t $CLUSTER_ID -c /opt/kafka/config/kraft/server.properties
 
 exec kafka-server-start.sh /opt/kafka/config/kraft/server.properties
+
+
+child=$!
+echo "==> ✅ Kafka server started.";
+
+kafka_addr="SERVICE.$NAMESPACE.svc.cluster.local:9092"
+
+if [ -z $KRAFT_CREATE_TOPICS ]; then
+    echo "==> No topic requested for creation.";
+else
+    echo "==> Creating topics...";
+    chmod +x ./wait-for-it.sh
+
+    ./wait-for-it.sh $kafka_addr;
+
+    pc=1
+    if [ $KRAFT_PARTITIONS_PER_TOPIC ]; then
+        pc=$KRAFT_PARTITIONS_PER_TOPIC
+    fi
+
+    existing_topics=$(kafka-topics.sh --list --bootstrap-server $kafka_addr)
+    for i in $(echo $KAFKA_TOPICS | sed "s/,/ /g")
+        if [[ " $existing_topics " =~ .*\ $i\ .* ]]; then
+            echo "Topic $i already exists";
+        else
+            ./bin/kafka-topics.sh --create --topic "$i" --partitions "$pc" --replication-factor $KAFKA_REPLICATION_FACTOR --bootstrap-server $kafka_addr;
+        fi
+    do
+    done
+    echo "==> ✅ Requested topics created.";
+fi
+
+
+wait "$child";
+

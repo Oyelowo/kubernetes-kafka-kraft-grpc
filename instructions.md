@@ -1,3 +1,39 @@
+Running the App
+
+1- Launch the virtual machine with virtual box. Download first if you dont have vagrant and virutal box. This also launches
+ `vagrant up`
+
+2- SSH into the Virtual machine
+`vagrant ssh`
+
+3- Get superuser power
+ `sudo su`
+
+NOTE: 4 & 5 makes it possible to run the cluster from the host(your machine).
+You may ignore them if you're runnig kubectl commands directly from within the virtual machine
+4- Copy kubernetes config output from the below command
+`cat /etc/rancher/k3s/k3s.yaml`
+
+5- Paste the above command into kubeconfig file in your host machine. It is usually in `~/.kube/config`. You can choose to delete existing config
+`vi ~/.kube/config`
+
+6- Check pods running within your cluster
+`kubectl get po -A`
+
+7- Deploy all resources for the application. This sets up the databases, services and kafka
+`kubectl apply -f deployment/`
+
+8- Seed the database with some data. This needs to be done only once. This creates location table in location db and person table in person db.
+It also creates location kafka topic in kafka
+It relies on the name of the statefulsets postgres databases set in kubernetes resource.
+  a- Make script executable: `chmod+x ./db/setup_dbs.sh`
+  b: Run script: `./db/setup_dbs.sh`
+
+
+9- Check list of kafka topics which should only be location topic created within the command above
+    `kubectl exec -i kafka-0 -n kafka-kraft -- bash -c "kafka-topics.sh --list --bootstrap-server localhost:9092"`
+#
+
 Generate code from protobuf
 `python3 -m grpc_tools.protoc -I./ --python_out=./ --grpc_python_out=./ protobuf/person.proto`
 
