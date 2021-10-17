@@ -15,7 +15,7 @@ data:
   API_PERSON_HOST: udaconnect-api-person.default.svc.cluster.local
   API_PERSON_PORT: "50052"
   #API_LOCATION_HOST: udaconnect-api-location
-  API_LOCATION_HOST: udaconnect-api-location.kafka.svc.cluster.local
+  API_LOCATION_HOST: udaconnect-api-location.default.svc.cluster.local
   API_LOCATION_PORT: "50051"
   KAFKA_HOST: kafka-svc.kafka-kraft.svc.cluster.local
   KAFKA_PORT: "9092"

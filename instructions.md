@@ -67,10 +67,7 @@ curl -X POST -H "Content-Type: application/json" \
  -d '{"first_name": "Oyelowo","last_name":"Oyedayo", "company_name":"Blayz"}' \
 "http://localhost:30001/api/persons"
 
-    int32 person_id = 1;
-    string longitude = 2;
-    string latitude = 3;
-    string creation_time = 4;
+
 
 curl -X POST -H "Content-Type: application/json" \
  -d '{"person_id": 1,"longitude":"24.9384", "latitude":"60.1699"}' \
