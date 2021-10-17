@@ -3,6 +3,8 @@ import os
 from datetime import datetime
 from typing import List, Optional
 
+from flask.wrappers import Response
+
 from app.udaconnect.schemas import (ConnectionSchema, LocationSchema,
                                     PersonSchema)
 from app.udaconnect.services import (ConnectionService, LocationService,
@@ -11,6 +13,7 @@ from flask import request
 from flask_accepts import accepts, responds
 from flask_restx import Namespace, Resource
 from google.protobuf.json_format import MessageToJson
+from kafka import KafkaProducer
 
 DATE_FORMAT = "%Y-%m-%d"
 
@@ -24,6 +27,9 @@ API_LOCATION_PORT = os.getenv("API_LOCATION_PORT")
 
 API_PERSON_HOST = os.getenv("API_PERSON_HOST")
 API_PERSON_PORT = os.getenv("API_PERSON_PORT")
+
+KAFKA_HOST = os.getenv("KAFKA_HOST")
+KAFKA_PORT = os.getenv("KAFKA_PORT")
 
 person_channel = grpc.insecure_channel(f"{API_PERSON_HOST}:{API_PERSON_PORT}")
 person_stub = person_pb2_grpc.PersonServiceStub(person_channel)
@@ -42,8 +48,14 @@ class LocationResource(Resource):
     def post(self):
         request.get_json()
         # TODO: Send location data to Kafka Location topic
-        location = LocationService.create(request.get_json())
-        return location
+        
+        # kafka_data = json.dumps(request.get_json())
+        producer = KafkaProducer(bootstrap_servers=f"{KAFKA_HOST}:{KAFKA_PORT}")
+        producer.send('location', request.get_json())
+
+        # location = LocationService.create(request.get_json())
+        # return request.get_json()
+        return Response(status=202)
 
     @responds(schema=LocationSchema)
     def get(self, location_id):

@@ -101,7 +101,7 @@ class LocationServicer(location_pb2_grpc.LocationServiceServicer):
 
         return location
 
-    def GetConnection(self, request, context):
+    def GetLocation(self, request, context):
         request_value = {
                 "id" : request.id,
         }

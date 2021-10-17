@@ -1,10 +1,20 @@
 Generate code from protobuf
 `python3 -m grpc_tools.protoc -I./ --python_out=./ --grpc_python_out=./ protobuf/person.proto`
 
-For  person API
-`python3 -m grpc_tools.protoc -I./ --python_out=./modules/api_person/app --grpc_python_out=./modules/api_person/app/ protobuf/person.proto`
+For  person Service
+`python3 -m grpc_tools.protoc -I./ --python_out=./modules/person/app --grpc_python_out=./modules/person/app/ protobuf/person.proto`
 
-This will generate protobuf code from the .proto file into `./modules/api_person/`
+This will generate protobuf code from the .proto file into `./modules/person/`
+
+For Location Service
+`python3 -m grpc_tools.protoc -I./ --python_out=./modules/location/app --grpc_python_out=./modules/location/app/ protobuf/person.proto`
+
+This will generate protobuf code from the .proto file into `./modules/location/`
+
+For the main API. Generate all protos. Notice the asterik at the end?
+`python3 -m grpc_tools.protoc -I./ --python_out=./modules/location/app --grpc_python_out=./modules/location/app/ protobuf/*`
+
+This will generate protobuf code from the .proto file into `./modules/location/`
 
 
 # Local development with docker compose
