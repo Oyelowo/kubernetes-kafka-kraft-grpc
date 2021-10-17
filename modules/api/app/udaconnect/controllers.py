@@ -19,8 +19,8 @@ import grpc
 from protobuf import connection_pb2_grpc, person_pb2, person_pb2_grpc
 
 
-API_LOCATION_HOST = os.getenv("API_LOCATION_HOST", "localhost")
-API_LOCATION_PORT = os.getenv("API_LOCATION_PORT", "localhost")
+API_LOCATION_HOST = os.getenv("API_LOCATION_HOST")
+API_LOCATION_PORT = os.getenv("API_LOCATION_PORT")
 
 API_PERSON_HOST = os.getenv("API_PERSON_HOST")
 API_PERSON_PORT = os.getenv("API_PERSON_PORT")
