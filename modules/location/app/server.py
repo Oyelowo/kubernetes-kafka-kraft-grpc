@@ -106,7 +106,7 @@ class LocationServicer(location_pb2_grpc.LocationServiceServicer):
                 "id" : request.id,
         }
         print(request_value)
-        location_db = LocationService.retrieve(**request_value)
+        location_db = LocationService.retrieve(int(request.id))
         print("Successfuly gets location from locaation service,", location_db)
         return location_pb2.Location(**location_db.jsonify())
 

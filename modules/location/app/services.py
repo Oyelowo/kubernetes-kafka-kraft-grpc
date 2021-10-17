@@ -134,7 +134,7 @@ class ConnectionService:
 
 class LocationService:
     @staticmethod
-    def retrieve(location_id) -> Location:
+    def retrieve(location_id: int) -> Location:
         location, coord_text = (
             db.session.query(Location, Location.coordinate.ST_AsText())
             .filter(Location.id == location_id)

@@ -50,12 +50,12 @@ class ConnectionService:
 
 class LocationService:
     @staticmethod
-    def retrieve(location_id: str):
+    def retrieve(id: str):
         location_channel = grpc.insecure_channel(f"{API_LOCATION_HOST}:{API_LOCATION_PORT}")
         location_stub = location_pb2_grpc.LocationServiceStub(location_channel)
         
         location = location_pb2.GetLocationRequest(
-            id =int(location_id),
+            id = int(id),
         )
         retrieved_location = location_stub.GetLocation(location) 
         print("Getting locaation:", retrieved_location)
