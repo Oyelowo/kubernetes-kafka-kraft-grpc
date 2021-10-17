@@ -46,12 +46,11 @@ class LocationResource(Resource):
     @accepts(schema=LocationSchema)
     @responds(schema=LocationSchema)
     def post(self):
-        request.get_json()
-        # TODO: Send location data to Kafka Location topic
-        
-        # kafka_data = json.dumps(request.get_json())
         producer = KafkaProducer(bootstrap_servers=f"{KAFKA_HOST}:{KAFKA_PORT}")
-        producer.send('location', request.get_json())
+        data = {**request.get_json(), "creation_time": datetime.now().isoformat(timespec='seconds')}
+        kafka_data = json.dumps(data).encode()
+        print("Sending data to kafka", kafka_data)
+        producer.send('location', kafka_data)
 
         # location = LocationService.create(request.get_json())
         # return request.get_json()
@@ -59,7 +58,6 @@ class LocationResource(Resource):
 
     @responds(schema=LocationSchema)
     def get(self, location_id):
-        # TODO: Get location data from location service via GRPC
         location = LocationService.retrieve(location_id)
         return location
 

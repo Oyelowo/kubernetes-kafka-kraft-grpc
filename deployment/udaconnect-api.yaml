@@ -62,6 +62,16 @@ spec:
             configMapKeyRef:
               name: db-env
               key: API_LOCATION_PORT
+        - name: KAFKA_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: db-env
+              key: KAFKA_HOST
+        - name: KAFKA_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: db-env
+              key: KAFKA_PORT
         # - name: API_LOCATION_HOST
         #   value: udaconnect-api-location
         # - name: API_LOCATION_PORT
