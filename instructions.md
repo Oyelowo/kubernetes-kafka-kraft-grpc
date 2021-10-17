@@ -55,10 +55,26 @@ curl -X POST -H "Content-Type: application/json" \
 
 
 - Create location. This sends the location to kafka via the api and the location service subscribes to the location topics to save incoming location to its postgres
+- 
 curl -X POST -H "Content-Type: application/json" \
  -d '{"person_id": 1,"longitude":"24.9384", "latitude":"60.1699"}' \
 "http://localhost:30001/api/locations"
 
+## Postgres DB client
+You can view the databases in a PG client such as PGAdmin or Postico
+1- Person DB
+    - Host: localhost
+    - User: ct_admin
+    - Password: wowimsosecure
+    - port: 30010
+    - database: person
+
+2- Location DB
+    - Host: localhost
+    - User: ct_admin
+    - Password: wowimsosecure
+    - port: 30011
+    - database: location
 
 ## ADDITIONAL
 ### Generate code from protobuf
