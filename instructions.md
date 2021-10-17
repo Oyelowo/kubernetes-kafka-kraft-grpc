@@ -62,13 +62,17 @@ chmod +x ./db/setup_dbs.sh
 9- Check list of kafka topics which should only be location topic created within the command above
 
 ```sh
-kubectl exec -i kafka-0 -n kafka-kraft -- bash -c "kafka-topics.sh --list --bootstrap-server kafka-svc.kafka-kraft.svc.cluster.local:9092"`
-```
+kubectl exec -i kafka-0 -n kafka-kraft -- bash -c "kafka-topics.sh --list --bootstrap-server kafka-svc.kafka-kraft.svc.cluster.local:9092"
 
-or
-
-```sh
+# or
 kubectl exec -i kafka-0 -n kafka-kraft -- bash -c "kafka-topics.sh --list --bootstrap-server localhost:9092"
+
+# You can also subscribe to topic
+
+kubectl exec -i kafka-0 -n kafka-kraft -- bash -c "kafka-console-consumer.sh \
+  --topic location \
+  --bootstrap-server kafka-svc.kafka-kraft.svc.cluster.local:9092 \
+  --from-beginning"
 ```
 
 ## Testing Apis
@@ -99,6 +103,17 @@ curl -X POST -H "Content-Type: application/json" \
 curl -X POST -H "Content-Type: application/json" \
  -d '{"person_id": 1,"longitude":"24.9384", "latitude":"60.1699"}' \
 "http://localhost:30001/api/locations"
+
+# You can also send plenty location data for testing:
+for i in {1..10000}
+    do
+    # your-unix-command-here
+    echo $i
+    curl -X POST -H "Content-Type: application/json" \
+    -d '{"person_id": 3,"longitude":"24.9384", "latitude":"60.1699"}' \
+    "http://localhost:30001/api/locations"
+done
+
 ```
 
 ## Postgres DB client
