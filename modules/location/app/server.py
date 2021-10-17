@@ -119,10 +119,9 @@ def consume_location():
     consumer = KafkaConsumer(
         location_topic,
         bootstrap_servers=[f"{KAFKA_HOST}:{KAFKA_PORT}"],
-        # auto_offset_reset="earliest",
-        auto_offset_reset="latest",
+        auto_offset_reset="earliest",
         enable_auto_commit=True,
-        # group_id="location_consumer_group",
+        group_id="location_consumer_group",
         value_deserializer=lambda x: json.loads(x.decode('utf-8'))
     )
     
