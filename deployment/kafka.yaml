@@ -72,7 +72,6 @@ spec:
             claimName: kafka-pv-claim
       containers:
         - name: kafka-container
-          # image: docker_username/kafka-kraft
           image: oyelowo/kafka-kraft-mode-3.0.0:latest
           # readinessProbe:
           #   httpGet:
