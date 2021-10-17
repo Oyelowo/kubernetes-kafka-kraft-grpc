@@ -9,7 +9,7 @@ from typing import Any
 from geoalchemy2 import Geometry
 from geoalchemy2.shape import to_shape
 from shapely.geometry.point import Point
-from sqlalchemy import BigInteger, Column, DateTime, Integer
+from sqlalchemy import BigInteger, Column, DateTime, Integer, func
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from config import db  # noqa
@@ -23,6 +23,12 @@ class Location(db.Model):
     coordinate = Column(Geometry("POINT"), nullable=False)
     creation_time = Column(DateTime, nullable=False, default=datetime.utcnow)
     _wkt_shape: str = None
+    
+    @staticmethod
+    def get_max_id(session) -> int:
+        row = session.query(func.max(Location.id)).first()
+        return row[0] if row[0] is not None else 0
+        
 
     @property
     def wkt_shape(self) -> str:

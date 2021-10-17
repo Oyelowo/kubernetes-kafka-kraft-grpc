@@ -12,10 +12,7 @@ logger = logging.getLogger("udaconnect-api")
 
 
 import grpc
-from .protobuf import connection_pb2, connection_pb2_grpc, location_pb2, location_pb2_grpc, person_pb2
-
-# channel = grpc.insecure_channel("localhost:50051", options=(('grpc.enable_http_proxy', 0),))
-# stub = person_pb2_grpc.PersonServiceStub(channel)
+from protobuf import connection_pb2, connection_pb2_grpc, location_pb2, location_pb2_grpc, person_pb2
 
 API_LOCATION_HOST = os.getenv("API_LOCATION_HOST")
 API_LOCATION_PORT = os.getenv("API_LOCATION_PORT")

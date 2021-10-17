@@ -65,6 +65,10 @@ kubectl delete pods --all
 kubectl delete svc --all 
 kubectl delete configmaps --all 
 
+// delete pods with label - service : udaconnect-api-person
+kubectl delete po -l "service=udaconnect-api-person"
+kubectl delete po -l "service=udaconnect-api-location"
+
 kubectl apply -f deployment/  
 
 

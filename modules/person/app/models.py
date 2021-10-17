@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, func
 from sqlalchemy.dialects import postgresql
 
 from config import db  # noqa
@@ -14,6 +14,12 @@ class Person(db.Model):
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     company_name = Column(String, nullable=False)
+    
+    @staticmethod
+    def get_max_id(session) -> int:
+        row = session.query(func.max(Person.id)).first()
+        return row[0] if row[0] is not None else 0
+        
     
     def jsonify(self):
         return {

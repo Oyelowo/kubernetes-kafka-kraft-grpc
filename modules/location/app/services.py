@@ -151,6 +151,7 @@ class LocationService:
         new_location.person_id = location["person_id"]
         new_location.creation_time = location["creation_time"]
         new_location.coordinate = ST_Point(location["latitude"], location["longitude"])
+        new_location.id = Location.get_max_id(db.session) + 1
         db.session.add(new_location)
         db.session.commit()
 

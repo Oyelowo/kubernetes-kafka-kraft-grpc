@@ -8,6 +8,7 @@ from flask import Flask, Response, g, jsonify, request
 from kafka import KafkaProducer
 
 from config import create_app
+from modules.api import app
 from services import ConnectionService, LocationService
 
 from protobuf import (connection_pb2, connection_pb2_grpc, location_pb2,
@@ -39,7 +40,7 @@ DATE_FORMAT = "%Y-%m-%d"
 #     kafka_producer = g.kafka_producer
 #     kafka_producer.send("items", kafka_data)
 
-# #@app.before_request
+# @app.before_request
 # def before_request():
 #     # Set up a Kafka producer
 #     TOPIC_NAME = 'topic-a'
@@ -100,6 +101,7 @@ class LocationServicer(location_pb2_grpc.LocationServiceServicer):
         location = location_pb2.Location(**new_location.jsonify())
 
         return location
+
     def GetConnection(self, request, context):
         request_value = {
                 "id" : request.id,
