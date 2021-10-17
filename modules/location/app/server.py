@@ -20,52 +20,6 @@ DATE_FORMAT = "%Y-%m-%d"
 
 
 
-# TODO:
-# 1.
-# Subscribe to kafka location topic and dequeue location data from kafka
-# Store locaton data
-
-# 2.
-# Create a Connection server that serves connection to udaconnect api services
-
-# def create_location(order_data):
-#     """
-#     This is a stubbed method of retrieving a resource. It doesn't actually do anything.
-#     """
-#     # Turn order_data into a binary string for Kafka
-#     kafka_data = json.dumps(order_data).encode()
-#     # Kafka producer has already been set up in Flask context
-#     kafka_producer = g.kafka_producer
-#     kafka_producer.send("items", kafka_data)
-
-# @app.before_request
-# def before_request():
-#     # Set up a Kafka producer
-#     TOPIC_NAME = 'topic-a'
-#     KAFKA_SERVER = 'localhost:9093'
-#     producer = KafkaProducer(bootstrap_servers=KAFKA_SERVER)
-#     # Setting Kafka to g enables us to use this
-#     # in other parts of our application
-#     g.kafka_producer = producer
-
-
-# @api.route("/orders")
-# class LocationResource1(Resource):
-# #     # @accepts(schema=LocationSchema)
-#     # @responds(schema=LocationSchema)
-#     def post(self):
-#         request_body = request.get_json()
-#         print("before")
-#         kafka_data = json.dumps(request_body).encode()
-#         TOPIC_NAME = 'topic-a'
-#         KAFKA_SERVER = 'localhost:8001'
-#         kafka_producer = KafkaProducer(bootstrap_servers=KAFKA_SERVER)
-#         kafka_producer.send("test", kafka_data)
-#         # result = create_order(request_body)
-#         print("after")
-#         return Response(status=202)
-
-
 def format_date(date):
     return datetime.strptime(
             date, DATE_FORMAT
@@ -130,7 +84,6 @@ def consume_location():
         LocationService.create(msg.value)
         print("Successfully stores location")
 
-
 class Server:
     @staticmethod
     def run():
@@ -138,10 +91,10 @@ class Server:
         connection_pb2_grpc.add_ConnectionServiceServicer_to_server(ConnectionServicer(), server)
         location_pb2_grpc.add_LocationServiceServicer_to_server(LocationServicer(), server)
         create_app(os.getenv("FLASK_ENV") or "test")
-        consume_location()
         server.add_insecure_port('[::]:50051')
         
         server.start()
+        consume_location()
         server.wait_for_termination()
 
 
