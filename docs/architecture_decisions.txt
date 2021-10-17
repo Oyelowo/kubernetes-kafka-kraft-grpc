@@ -1,0 +1,26 @@
+The application was split into the mainly 5
+- The frontend
+This is kept as is and can be scaled individually if we gain more loads. We can consider horizontal autoscaling if our workload becomes very dynamic
+
+- The main API
+This is the gateway to the backend application and mainly responsible
+for validating incoming requests and help simplify the backend service.
+It connects to all other internal services to provide necessary data to the application.
+This helps to simplify the application routing and make it easier to document and organise our endpoints.
+It does not directly connect to the database
+
+- The location service
+The location service was split out to be primarily responsible for storing locational data 
+and also providing connection/location data for the frontend application. This service
+consumes data from kafka and this allows to handle very high traffic without overwhelming the
+service when we get a lot of locational data from our users. We can scale out this service as needed
+to minimise backlogs of location data being processed.
+
+- The person service
+This service is primary responsible for managing data for our users. It stores and provides 
+user information to both the frontend application and the location service when needed.
+
+- The kafka pubsub system
+This is introduced between our main API and Location consumer to be able to handle high influx
+of location data in a fault tolerant manner without overwhelming the location service.
+
