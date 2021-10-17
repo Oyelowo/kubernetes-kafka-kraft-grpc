@@ -68,13 +68,11 @@ class PersonsResource(Resource):
     @responds(schema=PersonSchema)
     def post(self):
         payload = request.get_json()
-        # TODO: Send Person payload to person service via GRPC
         new_person = PersonService.create(person_stub, payload)
         return str(new_person)
 
     @responds(schema=PersonSchema, many=True)
     def get(self):
-        # TODO: Get all persons from person service via GRPC
         all_persons = PersonService.retrieve_all(person_stub)
         return all_persons
 
@@ -84,7 +82,6 @@ class PersonsResource(Resource):
 class PersonResource(Resource):
     @responds(schema=PersonSchema)
     def get(self, person_id):
-        # TODO: Get person from person service via GRPC
         person = PersonService.retrieve(person_stub, int(person_id))
         return person
 

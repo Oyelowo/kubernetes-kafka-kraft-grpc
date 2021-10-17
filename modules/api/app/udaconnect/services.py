@@ -94,7 +94,8 @@ class PersonService:
 
     @staticmethod
     def retrieve(stub, person_id: int):
-        person = stub.GetPerson(person_pb2.GetPersonRequest(id=person_id))
+        person_request = person_pb2.GetPersonRequest(id=person_id)
+        person = stub.GetPerson(person_request)
         print("Retrieving person", person)
         return MessageToDict(person, preserving_proto_field_name=True)
 

@@ -1,4 +1,5 @@
-Running the App
+# Instructions
+## Running the App in kubernetes
 
 1- Launch the virtual machine with virtual box. Download first if you dont have vagrant and virutal box. This also launches
  `vagrant up`
@@ -31,29 +32,53 @@ It relies on the name of the statefulsets postgres databases set in kubernetes r
 
 
 9- Check list of kafka topics which should only be location topic created within the command above
-    `kubectl exec -i kafka-0 -n kafka-kraft -- bash -c "kafka-topics.sh --list --bootstrap-server localhost:9092"`
-#
+`kubectl exec -i kafka-0 -n kafka-kraft -- bash -c "kafka-topics.sh --list --bootstrap-server kafka-svc.kafka-kraft.svc.cluster.local:9092"`
 
-Generate code from protobuf
-`python3 -m grpc_tools.protoc -I./ --python_out=./ --grpc_python_out=./ protobuf/person.proto`
+or
 
-For  person Service
+`kubectl exec -i kafka-0 -n kafka-kraft -- bash -c "kafka-topics.sh --list --bootstrap-server localhost:9092"`
+
+
+## Testing Apis
+- Get person with ID of 1
+`curl -X GET "http://localhost:30001/api/persons/1" -H "accept: application/json"`
+
+- Get all connections for person 1 between date
+`curl -X GET "http://localhost:30001/api/persons/1/connection?distance=5&end_date=2022-10-01&start_date=2020-01-01" -H "accept: application/json"`
+
+- Create new person
+```
+curl -X POST -H "Content-Type: application/json" \
+ -d '{"first_name": "Oyelowo","last_name":"Oyedayo", "company_name":"Blayz"}' \
+"http://localhost:30001/api/persons"
+```
+
+
+- Create location. This sends the location to kafka via the api and the location service subscribes to the location topics to save incoming location to its postgres
+curl -X POST -H "Content-Type: application/json" \
+ -d '{"person_id": 1,"longitude":"24.9384", "latitude":"60.1699"}' \
+"http://localhost:30001/api/locations"
+
+
+## ADDITIONAL
+### Generate code from protobuf
+
+- For  person Service
 `python3 -m grpc_tools.protoc -I./ --python_out=./modules/person/app --grpc_python_out=./modules/person/app/ protobuf/person.proto`
 
 This will generate protobuf code from the .proto file into `./modules/person/`
 
-For Location Service
+- For Location Service
 `python3 -m grpc_tools.protoc -I./ --python_out=./modules/location/app --grpc_python_out=./modules/location/app/ protobuf/*`
 
 This will generate protobuf code from the .proto file into `./modules/location/`
 
-For the main API. Generate all protos. Notice the asterik at the end?
+- For the main API. Generate all protos. Notice the asterik at the end?
 `python3 -m grpc_tools.protoc -I./ --python_out=./modules/api --grpc_python_out=./modules/api/ protobuf/*`
 
 This will generate protobuf code from the .proto file into `./modules/location/`
 
-
-# Local development with docker compose
+###  Local development with docker compose
 `docker-compose  up --build`
 
 `chmod +x scripts/run_db_docker.sh`
@@ -127,7 +152,7 @@ kubectl apply -f deployment/
 
 Kafka
 
-# KRaft mode Kafka on Kubernetes
+## Kafka: KRaft mode Kafka on Kubernetes
 
 Resources for a tutorial that covers running KRaft mode Kafka v3.0.0 on a Minikube-based Kubernetes cluster.
 
@@ -147,19 +172,19 @@ if in default namespace, below should suffice
 kafka-console-producer.sh \
   --topic location \
   --bootstrap-server localhost:9092 \
-  --property parse.key=true \  // optional
-  --property key.separator=":"  // optional
+  --property parse.key=true \  # optional
+  --property key.separator=":"  # optional
 ```
 
 In another terminal
 Console consumer:
 ```
 kafka-console-consumer.sh \
-  --topic test \
+  --topic location \
   --bootstrap-server localhost:9092 \
   --from-beginning \
-  --property print.key=true \
-  --property key.separator="-"
+  --property print.key=true \ # optional
+  --property key.separator="-" # optional
 ```
 
 ## Tutorial
