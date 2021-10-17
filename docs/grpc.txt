@@ -1,0 +1,62 @@
+############################################################################################################
+#################################### LOCATION SERVICE ######################################################
+############################################################################################################
+import os
+import grpc
+from google.protobuf.json_format import MessageToDict, MessageToJson
+from protobuf import (connection_pb2, connection_pb2_grpc, person_pb2,
+                      person_pb2_grpc)
+
+api_person_host = os.getenv("API_PERSON_HOST", "localhost")
+api_location_host = os.getenv("API_LOCATION_HOST", "localhost")
+
+from google.protobuf.json_format import MessageToDict, MessageToJson
+channel = grpc.insecure_channel(f"{api_person_host}:30003", options=(('grpc.enable_http_proxy', 0),))
+connection_stub = connection_pb2_grpc.ConnectionServiceStub(channel)
+
+connection_request = connection_pb2.GetConnectionRequest(
+    person_id = 1,
+    start_date = "2020-01-01", 
+    end_date = "2020-12-30",
+    meters = 6.0,
+)
+response = connection_stub.GetConnection(connection_request)
+
+print("response", response)
+print("FORMATTEd", [MessageToDict(m, preserving_proto_field_name=True) for m in response3.connections])
+
+
+
+
+################################################################################################
+########################## PERSON SERVICE ######################################################
+################################################################################################
+
+import os
+import grpc
+from google.protobuf.json_format import MessageToDict, MessageToJson
+from protobuf import person_pb2, person_pb2_grpc
+
+api_person_host = os.getenv("API_PERSON_HOST", "localhost")
+channel = grpc.insecure_channel(f"{api_person_host}:30002", options=(('grpc.enable_http_proxy', 0),))
+stub = person_pb2_grpc.PersonServiceStub(channel)
+
+
+person = person_pb2.CreatePersonRequest(
+    first_name = "Oyelowo",
+    last_name = "Oyedayo",
+    company_name = "Strength",
+)
+
+
+response = stub.CreatePerson(person) 
+print("response", response)
+
+
+response = stub.GetPerson(person_pb2.GetPersonRequest(id=1))
+
+print("response", response)
+
+response = stub.GetAllPersons(person_pb2.Empty())
+print("response", response)
+print("response", [MessageToDict(m, preserving_proto_field_name=True) for m in response.persons])

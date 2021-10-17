@@ -1,0 +1,8 @@
+{
+  "endpoints": [
+    "http://localhost:30001/api/persons/<person-id>",
+    "http://localhost:30001/api/persons",
+    "http://localhost:30001/api/locations",
+    "http://localhost:30001/api/persons/1/connection?distance=5&end_date=2022-10-01&start_date=2020-01-01"
+  ]
+}
