@@ -8,7 +8,6 @@ from flask import Flask, Response, g, jsonify, request
 from kafka import KafkaProducer
 
 from config import create_app
-from modules.api import app
 from services import ConnectionService, LocationService
 
 from protobuf import (connection_pb2, connection_pb2_grpc, location_pb2,

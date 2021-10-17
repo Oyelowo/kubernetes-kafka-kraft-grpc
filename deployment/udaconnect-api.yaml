@@ -43,14 +43,28 @@ spec:
             cpu: "256m"
         env:
         - name: API_PERSON_HOST
-          value: udaconnect-api-person
-          # value: 192.168.50.4
-          # value: localhost
+          valueFrom:
+            configMapKeyRef:
+              name: db-env
+              key: API_PERSON_HOST
         - name: API_PERSON_PORT
-          value: "50052"
+          valueFrom:
+            configMapKeyRef:
+              name: db-env
+              key: API_PERSON_PORT
         - name: API_LOCATION_HOST
-          value: udaconnect-api-location
+          valueFrom:
+            configMapKeyRef:
+              name: db-env
+              key: API_LOCATION_HOST
         - name: API_LOCATION_PORT
-          value: "50051"
+          valueFrom:
+            configMapKeyRef:
+              name: db-env
+              key: API_LOCATION_PORT
+        # - name: API_LOCATION_HOST
+        #   value: udaconnect-api-location
+        # - name: API_LOCATION_PORT
+        #   value: "50051"
        
       restartPolicy: Always

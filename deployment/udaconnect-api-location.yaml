@@ -43,9 +43,15 @@ spec:
             cpu: "256m"
         env:
         - name: API_PERSON_HOST
-          value: udaconnect-api-person
+          valueFrom:
+            configMapKeyRef:
+              name: db-env
+              key: API_PERSON_HOST
         - name: API_PERSON_PORT
-          value: "50052"
+          valueFrom:
+            configMapKeyRef:
+              name: db-env
+              key: API_PERSON_PORT
         - name: DB_USERNAME
           valueFrom:
             configMapKeyRef:

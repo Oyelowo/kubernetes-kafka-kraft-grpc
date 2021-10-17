@@ -127,3 +127,20 @@ To  produce and consume a topic
 Console producer:
 
 
+
+
+
+Connecting to a service. 
+It's okay to specify just the service name if within the same namespace as the pod/service.
+
+if cross namespace
+```
+<service_name>.<namespace>
+<service_name>.<namespace>.svc
+<service_name>.<namespace>.svc.cluster.local
+```
+
+ To double-check the last two parts, use CoreDNS as sample, check its configmap:
+`kubectl -n kube-system get configmap coredns -o yaml`
+
+From here, I can see the the configuration file for CoreDNS, and could be set to e.g `cluster.local` as port of full DNS name.
