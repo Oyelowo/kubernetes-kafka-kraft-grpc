@@ -7,12 +7,12 @@ For  person Service
 This will generate protobuf code from the .proto file into `./modules/person/`
 
 For Location Service
-`python3 -m grpc_tools.protoc -I./ --python_out=./modules/location/app --grpc_python_out=./modules/location/app/ protobuf/person.proto`
+`python3 -m grpc_tools.protoc -I./ --python_out=./modules/location/app --grpc_python_out=./modules/location/app/ protobuf/*`
 
 This will generate protobuf code from the .proto file into `./modules/location/`
 
 For the main API. Generate all protos. Notice the asterik at the end?
-`python3 -m grpc_tools.protoc -I./ --python_out=./modules/location/app --grpc_python_out=./modules/location/app/ protobuf/*`
+`python3 -m grpc_tools.protoc -I./ --python_out=./modules/api --grpc_python_out=./modules/api/ protobuf/*`
 
 This will generate protobuf code from the .proto file into `./modules/location/`
 
