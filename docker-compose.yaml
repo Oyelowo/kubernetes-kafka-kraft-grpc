@@ -63,6 +63,23 @@ services:
     ports:
       - "50051:50051"
 
+  api_location_producer:
+    build:
+      context: ./modules/location-producer/
+      dockerfile: Dockerfile
+    image: api_location_producer
+    container_name: location
+    environment:
+      - DB_USERNAME=ct_admin
+      - DB_NAME=location
+      - DB_HOST=postgres_location
+      - DB_PORT=5432
+      - DB_PASSWORD=wowimsosecure%
+      - API_PERSON_HOST=person
+      - API_PERSON_PORT=50052
+    ports:
+      - "50054:50054"
+
   postgres_location:
     image: postgis/postgis:12-2.5-alpine
     container_name: postgres-location

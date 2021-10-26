@@ -20,9 +20,12 @@ message GetLocationRequest {
     int32 id = 1;
 }
 
+message Empty {
+
+}
 
 service LocationService {
-    rpc CreateLocation (CreateLocationRequest) returns (Location);
+    rpc CreateLocation (CreateLocationRequest) returns (Empty);
     rpc GetLocation (GetLocationRequest) returns (Location);
 
 }

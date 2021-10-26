@@ -3,6 +3,7 @@ kind: Service
 metadata:
   labels:
     service: udaconnect-app
+    app: udaconnect-app
   name: udaconnect-app
 spec:
   ports:
@@ -12,6 +13,7 @@ spec:
     nodePort: 30000
   selector:
     service: udaconnect-app
+    app: udaconnect-app
   type: NodePort
 ---
 apiVersion: apps/v1
@@ -19,12 +21,14 @@ kind: Deployment
 metadata:
   labels:
     service: udaconnect-app
+    app: udaconnect-app
   name: udaconnect-app
 spec:
   replicas: 3
   selector:
     matchLabels:
       service: udaconnect-app
+      app: udaconnect-app
     strategy:
   # rollingUpdate:
   #   maxSurge: 25%
@@ -34,6 +38,7 @@ spec:
     metadata:
       labels:
         service: udaconnect-app
+        app: udaconnect-app
     spec:
       containers:
       - image: oyelowo/udaconnect-frontend:latest

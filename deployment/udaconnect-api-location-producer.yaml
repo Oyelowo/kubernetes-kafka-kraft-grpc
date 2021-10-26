@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: udaconnect-api-location-producer
+    app: udaconnect-api-location-producer
+  name: udaconnect-api-location-producer
+spec:
+  ports:
+  - name: "50053"
+    port: 50053
+    targetPort: 50053
+    nodePort: 30004
+  selector:
+    service: udaconnect-api-location-producer
+    app: udaconnect-api-location-producer
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: udaconnect-api-location-producer
+    app: udaconnect-api-location-producer
+  name: udaconnect-api-location-producer
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      service: udaconnect-api-location-producer
+      app: udaconnect-api-location-producer
+  template:
+    metadata:
+      labels:
+        service: udaconnect-api-location-producer
+        app: udaconnect-api-location-producer
+    spec:
+      containers:
+      - image: oyelowo/udaconnect-location-producer:latest
+        name: udaconnect-api-location-producer
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "64m"
+          limits:
+            memory: "256Mi"
+            cpu: "256m"
+        env:
+        - name: KAFKA_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: db-env
+              key: KAFKA_HOST
+        - name: KAFKA_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: db-env
+              key: KAFKA_PORT
+      restartPolicy: Always

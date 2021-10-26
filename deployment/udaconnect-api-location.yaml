@@ -3,6 +3,7 @@ kind: Service
 metadata:
   labels:
     service: udaconnect-api-location
+    app: udaconnect-api-location
   name: udaconnect-api-location
 spec:
   ports:
@@ -12,6 +13,7 @@ spec:
     nodePort: 30003
   selector:
     service: udaconnect-api-location
+    app: udaconnect-api-location
   type: NodePort
 ---
 apiVersion: apps/v1
@@ -19,16 +21,19 @@ kind: Deployment
 metadata:
   labels:
     service: udaconnect-api-location
+    app: udaconnect-api-location
   name: udaconnect-api-location
 spec:
   replicas: 2
   selector:
     matchLabels:
       service: udaconnect-api-location
+      app: udaconnect-api-location
   template:
     metadata:
       labels:
         service: udaconnect-api-location
+        app: udaconnect-api-location
     spec:
       containers:
       - image: oyelowo/udaconnect-location:latest

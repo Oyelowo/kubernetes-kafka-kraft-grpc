@@ -156,13 +156,21 @@ python3 -m grpc_tools.protoc -I./ --python_out=./modules/location/app --grpc_pyt
 
 This will generate protobuf code from the .proto file into `./modules/location/`
 
+- For Location Producer Service
+
+```sh
+python3 -m grpc_tools.protoc -I./ --python_out=./modules/location-producer/app --grpc_python_out=./modules/location-producer/app/ protobuf/*
+```
+
+This will generate protobuf code from the .proto file into `./modules/location-producer/`
+
 - For the main API. Generate all protos. Notice the asterik at the end?
 
 ```sh
 python3 -m grpc_tools.protoc -I./ --python_out=./modules/api --grpc_python_out=./modules/api/ protobuf/*
 ```
 
-This will generate protobuf code from the .proto file into `./modules/location/`
+This will generate protobuf code from the .proto file into `./modules/api/`
 
 ## Local development with docker compose
 

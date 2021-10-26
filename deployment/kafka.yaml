@@ -9,6 +9,7 @@ metadata:
   name: kafka-pv-volume
   labels:
     type: local
+    app: kafka-pv
 spec:
   storageClassName: manual
   capacity:

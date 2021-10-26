@@ -18,7 +18,9 @@ from services import ConnectionService, LocationService
 
 DATE_FORMAT = "%Y-%m-%d"
 
-
+KAFKA_HOST = os.getenv("KAFKA_HOST")
+KAFKA_PORT = os.getenv("KAFKA_PORT")
+    
 
 def format_date(date):
     return datetime.strptime(
@@ -47,10 +49,20 @@ class LocationServicer(location_pb2_grpc.LocationServiceServicer):
                 "latitude" : request.latitude,
                 "creation_time" : request.creation_time,
         }
+        
         print(request_value)
-        new_location = LocationService.create(request_value)
+        producer = KafkaProducer(bootstrap_servers=f"{KAFKA_HOST}:{KAFKA_PORT}")
+        data = {**request.get_json(), "creation_time": datetime.now().isoformat(timespec='seconds')}
+        kafka_data = json.dumps(data).encode()
+        
+        print("Sending data to kafka Via GRPC", kafka_data)
+        producer.send('location', kafka_data)
+        producer.flush()
 
-        location = location_pb2.Location(**new_location.jsonify())
+        # new_location = LocationService.create(request_value)
+        # This shouldn't return ID this way as it's sending data to the queue as DB would't have yet created the ID
+        # Would probably be better to return an empty value?
+        location = location_pb2.Location(id=999, **request_value)
 
         return location
 
@@ -67,8 +79,6 @@ class LocationServicer(location_pb2_grpc.LocationServiceServicer):
 
 
 def consume_location():
-    KAFKA_HOST = os.getenv("KAFKA_HOST")
-    KAFKA_PORT = os.getenv("KAFKA_PORT")
     location_topic = "location"
     consumer = KafkaConsumer(
         location_topic,
