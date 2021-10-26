@@ -39,23 +39,24 @@ connection_stub = connection_pb2_grpc.ConnectionServiceStub(connection_channel)
 
 # TODO: This needs better exception handling
 
-@api.route("/locations")
+# @api.route("/locations")
 @api.route("/locations/<location_id>")
 @api.param("location_id", "Unique ID for a given Location", _in="query")
 class LocationResource(Resource):
-    @accepts(schema=LocationSchema)
-    @responds(schema=LocationSchema)
-    def post(self):
-        producer = KafkaProducer(bootstrap_servers=f"{KAFKA_HOST}:{KAFKA_PORT}")
-        data = {**request.get_json(), "creation_time": datetime.now().isoformat(timespec='seconds')}
-        kafka_data = json.dumps(data).encode()
-        print("Sending data to kafka", kafka_data)
-        producer.send('location', kafka_data)
-        producer.flush()
+    # @accepts(schema=LocationSchema)
+    # @responds(schema=LocationSchema)
+    # # This is now done via GRPC server but keeping for reference purpose
+    # def post(self):
+    #     producer = KafkaProducer(bootstrap_servers=f"{KAFKA_HOST}:{KAFKA_PORT}")
+    #     data = {**request.get_json(), "creation_time": datetime.now().isoformat(timespec='seconds')}
+    #     kafka_data = json.dumps(data).encode()
+    #     print("Sending data to kafka", kafka_data)
+    #     producer.send('location', kafka_data)
+    #     producer.flush()
 
-        # location = LocationService.create(request.get_json())
-        # return request.get_json()
-        return Response(status=202)
+    #     # location = LocationService.create(request.get_json())
+    #     # return request.get_json()
+    #     return Response(status=202)
 
     @responds(schema=LocationSchema)
     def get(self, location_id):

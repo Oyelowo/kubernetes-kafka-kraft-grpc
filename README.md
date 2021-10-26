@@ -128,19 +128,19 @@ __OLD__: _But still works and kept for reference purpose_
 
 ```sh
 # OLD But still works and kept for reference purpose
-curl -X POST -H "Content-Type: application/json" \
- -d '{"person_id": 1,"longitude":"24.9384", "latitude":"60.1699"}' \
-"http://localhost:30001/api/locations"
+# curl -X POST -H "Content-Type: application/json" \
+#  -d '{"person_id": 1,"longitude":"24.9384", "latitude":"60.1699"}' \
+# "http://localhost:30001/api/locations"
 
-# You can also send plenty location data for testing:
-for i in {1..10000}
-    do
-    # your-unix-command-here
-    echo $i
-    curl -X POST -H "Content-Type: application/json" \
-    -d '{"person_id": 3,"longitude":"24.9384", "latitude":"60.1699"}' \
-    "http://localhost:30001/api/locations"
-done
+# # You can also send plenty location data for testing:
+# for i in {1..10000}
+#     do
+#     # your-unix-command-here
+#     echo $i
+#     curl -X POST -H "Content-Type: application/json" \
+#     -d '{"person_id": 3,"longitude":"24.9384", "latitude":"60.1699"}' \
+#     "http://localhost:30001/api/locations"
+# done
 ```
 
 ## Postgres DB client
