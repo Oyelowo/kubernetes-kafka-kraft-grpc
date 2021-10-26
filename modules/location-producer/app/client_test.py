@@ -22,8 +22,8 @@ location_stub = location_pb2_grpc.LocationServiceStub(channel)
 
 location_request = location_pb2.CreateLocationRequest(
     person_id = 1,
-    longitude = 64,
-    latitude = 22,
+    longitude = "64",
+    latitude = "22",
 )
 response = location_stub.CreateLocation(location_request)
 

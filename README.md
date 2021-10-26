@@ -99,9 +99,35 @@ curl -X POST -H "Content-Type: application/json" \
 "http://localhost:30001/api/persons"
 ```
 
-- Create location. This sends the location to kafka via the api and the location service subscribes to the location topics to save incoming location to its postgres
+- Create location
+  This sends location payload to the location producer service which is a grpc server that in turn sends the location data formatted as JSON into the `location` kafka topic. This topic is subsequently consumed  the location service which stores the data in the postgres database.
+
+  This was previously handled by the rest API server but has since been changed to handle higher location data traffic.
 
 ```sh
+python3 modules/location-producer/app/client_test.py 
+
+# You can also send plenty location data for testing:
+for i in {1..10000}
+    do
+    # your-unix-command-here
+    echo $i
+    python3 modules/location-producer/app/client_test.py 
+done
+
+# This does the sending to the GRPC location producer service, e.g
+# location_request = location_pb2.CreateLocationRequest(
+#     person_id = 1,
+#     longitude = "63",
+#     latitude = "21",
+# )
+# response = location_stub.CreateLocation(location_request)
+```
+
+__OLD__: _But still works and kept for reference purpose_
+
+```sh
+# OLD But still works and kept for reference purpose
 curl -X POST -H "Content-Type: application/json" \
  -d '{"person_id": 1,"longitude":"24.9384", "latitude":"60.1699"}' \
 "http://localhost:30001/api/locations"
@@ -115,7 +141,6 @@ for i in {1..10000}
     -d '{"person_id": 3,"longitude":"24.9384", "latitude":"60.1699"}' \
     "http://localhost:30001/api/locations"
 done
-
 ```
 
 ## Postgres DB client
