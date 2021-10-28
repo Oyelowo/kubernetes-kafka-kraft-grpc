@@ -3,8 +3,39 @@
 ## Application architecture
 ![Connect App Rearchitecture](./docs/architecture_design.png)
 ## Running the App in kubernetes
-1-5- k3d cluster create oyelowo-cluster-udacon --agents 3 -p "30000-32767:30000-32767@server:0" --kubeconfig-update-default
-1-5- `k3d cluster create oyelowo-cluster-udacon --agents 3 -p "30000-30020:30000-30020@server:0" --kubeconfig-update-default`
+
+1- Launch the virtual machine with virtual box. Download first if you dont have vagrant and virutal box. This also launches
+
+```sh
+ vagrant up
+```
+
+2- SSH into the Virtual machine
+
+```sh
+vagrant ssh
+```
+
+3- Get superuser power
+
+```sh
+sudo su
+```
+
+4- Copy kubernetes config output from the below command
+
+_ASIDE NOTE: 4 & 5 makes it possible to run the cluster from the host(your machine).
+You may ignore them if you're runnig kubectl commands directly from within the virtual machine_
+
+```sh
+cat /etc/rancher/k3s/k3s.yaml
+```
+
+5- Paste the above command into kubeconfig file in your host machine. It is usually in `~/.kube/config`. You can choose to delete existing config
+
+```sh
+vi ~/.kube/config
+```
 
 6- Deploy all resources for the application. This sets up the databases, services and kafka
 
